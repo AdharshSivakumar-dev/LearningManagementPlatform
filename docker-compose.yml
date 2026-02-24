@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: lms
+      POSTGRES_USER: lms
+      POSTGRES_PASSWORD: lms
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  django-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.django
+    env_file: .env.example
+    environment:
+      DATABASE_URL: postgres://lms:lms@db:5432/lms
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+
+  fastapi-user:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    env_file: .env.example
+    environment:
+      DATABASE_URL: postgres://lms:lms@db:5432/lms
+    depends_on:
+      - db
+    ports:
+      - "8001:8001"
+
+volumes:
+  pgdata:
+

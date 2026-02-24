@@ -1,0 +1,19 @@
+.m3-appbar {
+  background: #e9f0fb;
+}
+.m3-card {
+  border: 1px solid #e8e8ee;
+  border-radius: 14px;
+  background: #ffffff;
+}
+.bg-m3-surface {
+  background: #f7f8fb;
+}
+.btn-primary {
+  background-color: #6ea8fe;
+  border-color: #6ea8fe;
+}
+.navbar-brand {
+  color: #335c81;
+}
+

@@ -1,0 +1,14 @@
+Django Users:
+- username: admin, email: admin@example.com, password: [unavailable]
+
+LMS Users:
+- username: heisenberg, email: heisenberg@example.com, password: [unavailable]
+- username: Professor, email: prof@example.com, password: [unavailable]
+- username: Tony Stark, email: tony@stark.com, password: [unavailable]
+- username: Bruce Wayne, email: bruce@wayne.com, password: [unavailable]
+- username: Diana Prince, email: diana@them.com, password: [unavailable]
+- username: Neo, email: neo@matrix.io, password: [unavailable]
+- username: Harry Potter, email: harry@hogwarts.uk, password: [unavailable]
+- username: Hermione Granger, email: hermione@hogwarts.uk, password: [unavailable]
+- username: Jon Snow, email: jon@snow.w, password: [unavailable]
+- username: Walter White, email: walter@bb.tv, password: [unavailable]

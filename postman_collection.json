@@ -1,0 +1,86 @@
+{
+  "info": {
+    "name": "LMS User Panel API",
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef0123456789",
+    "description": "Collection for LMS FastAPI endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "url": {"raw": "http://localhost:8001/register/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["register",""]},
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"secret123\",\n  \"role\": \"student\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": {"raw": "http://localhost:8001/login/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["login",""]},
+        "body": {"mode": "raw", "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"secret123\"\n}"}
+      }
+    },
+    {
+      "name": "Courses - List",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/courses/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["courses",""]}
+      }
+    },
+    {
+      "name": "Course - Detail",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/courses/1", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["courses","1"]}
+      }
+    },
+    {
+      "name": "Enroll",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"},{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/enroll/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["enroll",""]},
+        "body": {"mode": "raw", "raw": "{\n  \"course_id\": 1\n}"}
+      }
+    },
+    {
+      "name": "My Courses",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/my-courses/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["my-courses",""]}
+      }
+    },
+    {
+      "name": "Progress - Update",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"},{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/progress/update/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["progress","update",""]},
+        "body": {"mode": "raw", "raw": "{\n  \"course_id\": 1,\n  \"completed_lessons\": 2,\n  \"progress_percent\": 22.2\n}"}
+      }
+    },
+    {
+      "name": "Progress - View",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/progress/view/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["progress","view",""]}
+      }
+    }
+  ],
+  "variable": [
+    {"key": "token", "value": ""}
+  ]
+}
