@@ -72,17 +72,3 @@ Postman
 - Import postman_collection.json
 - Use Register → Login to obtain token; set variable {{token}}
 
-Screenshots
-- After running, capture:
-  - Admin Dashboard: /admin/dashboard/
-  - API responses via Swagger /docs or Postman
-
-Security Notes
-- Set strong DJANGO_SECRET_KEY and JWT_SECRET in production.
-- Use Postgres with DATABASE_URL in production.
-
-Bonus Options
-- Dockerized stack (compose)
-- Chart.js reports (top enrolled courses)
-- Material 3-inspired pastel UI for dashboard
-
