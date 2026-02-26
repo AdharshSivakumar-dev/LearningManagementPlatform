@@ -2,7 +2,7 @@ Learning Management Platform (Django Admin + FastAPI User Panel)
 
 Overview
 - Django powers the Admin Panel (CRUD, dashboard, reports).
-- FastAPI powers the User Panel backend (JWT auth, course browsing, enrollments, progress).
+- FastAPI powers the User Panel backend (JWT auth, course browsing, enrollments, progress, subscriptions).
 - Both share one database (PostgreSQL via DATABASE_URL). SQLite is supported for quick local dev.
 
 Tech Stack
@@ -43,15 +43,20 @@ Local Dev (without Docker)
 Admin Features (Django)
 - Admin login/logout via Django Auth
 - Dashboard with totals and “Top Enrolled Courses” chart (Chart.js)
-- Manage Users, Courses (inline lessons), Enrollments, Progress
+- Manage Users (approve/deactivate), Courses (inline lessons, pricing, commissions), Enrollments, Progress
+- Manage Plans, Subscriptions, and Payments (INR pricing)
 
 User Panel (FastAPI)
 Auth
-- POST /register/ — create user and return JWT
-- POST /login/ — login returning JWT
+- POST /token/ — OAuth2 password flow (username=email) returns JWT
+- POST /auth/register/ — create user and return JWT
+- POST /auth/login/ — login returning JWT
+Plans
+- GET /plans/ — list plans (INR)
+- POST /subscribe/ — purchase plan (creates Subscription + Payment)
 Courses
-- GET /courses/ — list published courses
-- GET /courses/{id} — get course details
+- GET /courses/ — free courses for non-subscribers; all courses with valid subscription
+- GET /courses/{id} — guards premium content behind valid subscription
 Enrollments
 - POST /enroll/ — enroll as student
 - GET /my-courses/ — your enrolled list
@@ -62,13 +67,15 @@ Instructor
 - POST /courses/create/ — create a course (role=instructor)
 
 Models
-- LMSUser(id, name, email, role[student/instructor], password_hash)
-- Course(id, title, description, instructor_id, status[draft/published/archived])
+- LMSUser(id, name, email, role[student/instructor], password_hash, is_active)
+- Course(id, title, description, instructor_id, status[draft/published/archived], is_premium, price[INR], instructor_commission_percent)
 - Lesson(id, course_id, title, content, video_url, order)
 - Enrollment(id, user_id, course_id, enrolled_on unique(user,course))
 - Progress(id, enrollment_id one-to-one, completed_lessons, progress_percent)
+- Plan(id, name, price[INR], duration_days)
+- Subscription(id, user_id, plan_id, start_date, end_date, status)
+- Payment(id, user_id, plan_id, amount[INR], payment_date)
 
 Postman
 - Import postman_collection.json
 - Use Register → Login to obtain token; set variable {{token}}
-

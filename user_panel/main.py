@@ -2,12 +2,14 @@ from typing import List
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
 
 from .django_setup import setup as django_setup
 
 django_setup()
 
-from lms.models import LMSUser, Course, Enrollment, Progress  # noqa: E402
+from lms.models import LMSUser, Course, Enrollment, Progress, Plan, Subscription, Payment  # noqa: E402
+from django.db import models  # noqa: E402
 from django.db import transaction  # noqa: E402
 from django.db.models import Prefetch  # noqa: E402
 
@@ -19,6 +21,9 @@ from .schemas import (
     EnrollRequest,
     ProgressUpdateRequest,
     ProgressOut,
+    PlanOut,
+    SubscribeRequest,
+    PaymentOut,
 )
 from .auth import create_access_token, hash_password, verify_password
 from .deps import get_current_user, require_role
@@ -41,6 +46,8 @@ def token(form_data: OAuth2PasswordRequestForm = Depends()):
         user = LMSUser.objects.get(email=form_data.username)
     except LMSUser.DoesNotExist:
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="User is deactivated")
     if not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     token = create_access_token(str(user.id), user.role)
@@ -67,6 +74,8 @@ def login(payload: LoginRequest):
         user = LMSUser.objects.get(email=payload.email)
     except LMSUser.DoesNotExist:
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="User is deactivated")
     if not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     token = create_access_token(str(user.id), user.role)
@@ -75,7 +84,11 @@ def login(payload: LoginRequest):
 
 @app.get("/courses/", response_model=List[CourseOut])
 def list_courses(user=Depends(get_current_user)):
-    qs = Course.objects.select_related("instructor").filter(status="published")
+    user_id, _ = user
+    from django.utils import timezone as djtz
+    valid_sub = Subscription.objects.filter(user_id=user_id, status="active", end_date__gte=djtz.now()).exists()
+    base = Course.objects.select_related("instructor").filter(status="published")
+    qs = base if valid_sub else base.filter(is_premium=False)
     return [
         CourseOut(
             id=c.id,
@@ -90,10 +103,16 @@ def list_courses(user=Depends(get_current_user)):
 
 @app.get("/courses/{course_id}", response_model=CourseOut)
 def course_detail(course_id: int, user=Depends(get_current_user)):
+    from django.utils import timezone as djtz
     try:
         c = Course.objects.select_related("instructor").get(pk=course_id, status="published")
     except Course.DoesNotExist:
         raise HTTPException(status_code=404, detail="Course not found")
+    if c.is_premium:
+        user_id, _ = user
+        has_access = Subscription.objects.filter(user_id=user_id, status="active", end_date__gte=djtz.now()).exists()
+        if not has_access:
+            raise HTTPException(status_code=403, detail="Upgrade plan to access this course")
     return CourseOut(
         id=c.id,
         title=c.title,
@@ -186,3 +205,46 @@ def create_course(payload: CourseOut, user=Depends(require_role("instructor"))):
         status=payload.status or "draft",
     )
     return {"status": "ok", "course_id": course.id}
+
+
+@app.get("/plans/", response_model=List[PlanOut])
+def list_plans():
+    return [
+        PlanOut(id=p.id, name=p.name, price=float(p.price), duration_days=p.duration_days)
+        for p in Plan.objects.all().order_by("price")
+    ]
+
+
+@app.post("/subscribe/")
+def subscribe(req: SubscribeRequest, user=Depends(get_current_user)):
+    from django.utils import timezone as djtz
+    user_id, _ = user
+    try:
+        plan = Plan.objects.get(pk=req.plan_id)
+    except Plan.DoesNotExist:
+        raise HTTPException(status_code=404, detail="Plan not found")
+    start = djtz.now()
+    end = start + timedelta(days=plan.duration_days)
+    Subscription.objects.create(user_id=user_id, plan=plan, start_date=start, end_date=end, status="active")
+    Payment.objects.create(user_id=user_id, plan=plan, amount=plan.price)
+    return {"status": "ok", "plan": plan.name}
+
+
+@app.get("/payments/", response_model=List[PaymentOut])
+def list_payments(user=Depends(get_current_user)):
+    user_id, _ = user
+    return [
+        PaymentOut(plan_name=p.plan.name, amount=float(p.amount), payment_date=p.payment_date.isoformat())
+        for p in Payment.objects.select_related("plan").filter(user_id=user_id).order_by("-payment_date")
+    ]
+
+
+# Aliases to satisfy Task 2 required paths
+@app.post("/auth/register/", response_model=TokenResponse)
+def auth_register(payload: RegisterRequest):
+    return register(payload)
+
+
+@app.post("/auth/login/", response_model=TokenResponse)
+def auth_login(payload: LoginRequest):
+    return login(payload)

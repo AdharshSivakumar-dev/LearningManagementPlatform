@@ -4,8 +4,8 @@ __pycache__/
 *.log
 
 # Virtual Environment
+.venv/
 venv/
-env/
 
 # Django
 db.sqlite3

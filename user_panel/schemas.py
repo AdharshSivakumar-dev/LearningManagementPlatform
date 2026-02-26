@@ -42,3 +42,19 @@ class ProgressOut(BaseModel):
     completed_lessons: int
     progress_percent: float
 
+
+class PlanOut(BaseModel):
+    id: int
+    name: str
+    price: float
+    duration_days: int
+
+
+class SubscribeRequest(BaseModel):
+    plan_id: int
+
+
+class PaymentOut(BaseModel):
+    plan_name: str
+    amount: float
+    payment_date: str

@@ -7,6 +7,23 @@
   },
   "item": [
     {
+      "name": "Token (OAuth2 Password)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/x-www-form-urlencoded"}
+        ],
+        "url": {"raw": "http://localhost:8001/token/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["token",""]},
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {"key": "username", "value": "heisenberg@example.com"},
+            {"key": "password", "value": "walterwhite"}
+          ]
+        }
+      }
+    },
+    {
       "name": "Register",
       "request": {
         "method": "POST",
@@ -16,7 +33,7 @@
         "url": {"raw": "http://localhost:8001/register/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["register",""]},
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"secret123\",\n  \"role\": \"student\"\n}"
+          "raw": "{\n  \"name\": \"John Snow\",\n  \"email\": \"aegontargereyan@gmail.com\",\n  \"password\": \"snow1234\",\n  \"role\": \"student\"\n}"
         }
       }
     },
@@ -77,6 +94,30 @@
         "method": "GET",
         "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
         "url": {"raw": "http://localhost:8001/progress/view/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["progress","view",""]}
+      }
+    },
+    {
+      "name": "Plans - List",
+      "request": {
+        "method": "GET",
+        "url": {"raw": "http://localhost:8001/plans/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["plans",""]}
+      }
+    },
+    {
+      "name": "Subscribe",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"},{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/subscribe/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["subscribe",""]},
+        "body": {"mode": "raw", "raw": "{\n  \"plan_id\": 1\n}"}
+      }
+    },
+    {
+      "name": "Payments - My History",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/payments/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["payments",""]}
       }
     }
   ],
