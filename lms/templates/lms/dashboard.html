@@ -71,6 +71,25 @@
         </div>
       </div>
 
+      <div class="row mt-4 g-3">
+        <div class="col-md-6">
+          <div class="card m3-card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Monthly Revenue (INR)</h5>
+              <canvas id="revenueChart" height="140"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card m3-card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title mb-3">Activity Trend</h5>
+              <canvas id="activityChart" height="140"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="row mt-3">
         <div class="col-12">
           <div class="card m3-card shadow-sm">
@@ -87,6 +106,28 @@
                   <span class="material-symbols-rounded" style="font-size:18px;">group</span> Enrollments
                 </a>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-12">
+          <div class="card m3-card shadow-sm">
+            <div class="card-body">
+              <h6 class="text-muted mb-3">Recent Notifications</h6>
+              {% if recent_notifications %}
+                <ul class="list-group list-group-flush">
+                  {% for n in recent_notifications %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>{{ n.created_at|date:"Y-m-d H:i" }} — {{ n.user.name }}: {{ n.message }}</span>
+                      {% if not n.is_read %}<span class="badge bg-primary rounded-pill">new</span>{% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-muted mb-0">No notifications yet.</p>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -115,6 +156,24 @@
           plugins: { legend: { display: false } },
           scales: { y: { beginAtZero: true } }
         }
+      });
+
+      const rev = {{ revenue_series|safe }};
+      const rlabels = rev.map(d => d.label);
+      const rvalues = rev.map(d => d.value);
+      new Chart(document.getElementById('revenueChart').getContext('2d'), {
+        type: 'line',
+        data: { labels: rlabels, datasets: [{ label: 'Revenue (₹)', data: rvalues, borderColor: '#6ea8fe', tension: .35 }]},
+        options: { plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true}}}
+      });
+
+      const act = {{ activity_series|safe }};
+      const alabels = act.map(d => d.label);
+      const avalues = act.map(d => d.value);
+      new Chart(document.getElementById('activityChart').getContext('2d'), {
+        type: 'line',
+        data: { labels: alabels, datasets: [{ label: 'Events', data: avalues, borderColor: '#f7c8e0', tension: .35 }]},
+        options: { plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true}}}
       });
     </script>
   </body>

@@ -58,3 +58,32 @@ class PaymentOut(BaseModel):
     plan_name: str
     amount: float
     payment_date: str
+
+
+class NotificationOut(BaseModel):
+    id: int
+    message: str
+    is_read: bool
+    created_at: str
+
+
+class MarkReadRequest(BaseModel):
+    ids: List[int] | None = None
+    mark_all: bool = False
+
+
+class ActivityLogRequest(BaseModel):
+    action_type: str
+    action_detail: str | None = None
+
+
+class AnalyticsOverviewOut(BaseModel):
+    total_users: int
+    active_subscriptions: int
+    revenue_inr: float
+    popular_course: str | None
+
+
+class MonthlyRevenueOut(BaseModel):
+    label: str
+    value: float

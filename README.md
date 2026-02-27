@@ -1,5 +1,50 @@
 Learning Management Platform (Django Admin + FastAPI User Panel)
 
+Setup Guide
+- Prerequisites: Python 3.11+, pip, Git
+- Copy environment: cp .env.example .env and fill secrets (JWT, SMTP, optional DB URL)
+- Install dependencies:
+  - python -m venv .venv
+  - .\.venv\Scripts\Activate.ps1
+  - pip install -r requirements.txt
+- Initialize database:
+  - python manage.py migrate
+  - python manage.py createsuperuser
+- Run services:
+  - Admin: python manage.py runserver 0.0.0.0:8000
+  - API: uvicorn user_panel.main:app --host 0.0.0.0 --port 8001
+
+Email Setup (Gmail SMTP)
+- Enable 2‑Step Verification in Google Account
+- Create an App Password for “Mail” and copy it
+- Edit .env:
+  - EMAIL_HOST_USER=your_gmail_address@gmail.com
+  - EMAIL_HOST_PASSWORD=<your_app_password>
+- Restart Admin and API servers
+
+Testing Guide
+- Auth:
+  - POST /auth/register/ → create user; POST /token/ → get JWT (username=email)
+  - Use Authorize in Swagger (http://localhost:8001/docs)
+- Plans & Subscriptions:
+  - Add plans in Admin; GET /plans/ then POST /subscribe/ to purchase
+  - Expect: email to user; in‑app notification; Payment recorded
+- Courses & Enrollments:
+  - Publish courses; POST /enroll/ to enroll
+  - Expect: emails to student and instructor; in‑app notifications; activity log
+- Notifications & Activity:
+  - GET /notifications/ (user) → verify notifications
+  - Dashboard charts: revenue after subscribe; activity after subscribe/enroll/view
+
+GitHub Push
+- Ensure .env is ignored (.gitignore already includes it)
+- git init
+- git checkout -b main
+- git add .
+- git commit -m "Finalize LMS with subscriptions, analytics, notifications, SMTP email"
+- git remote add origin <your_repo_url>
+- git push -u origin main
+
 Overview
 - Django powers the Admin Panel (CRUD, dashboard, reports).
 - FastAPI powers the User Panel backend (JWT auth, course browsing, enrollments, progress, subscriptions).
@@ -43,6 +88,7 @@ Local Dev (without Docker)
 Admin Features (Django)
 - Admin login/logout via Django Auth
 - Dashboard with totals and “Top Enrolled Courses” chart (Chart.js)
+- Analytics: Monthly revenue (INR) and Activity trend line charts
 - Manage Users (approve/deactivate), Courses (inline lessons, pricing, commissions), Enrollments, Progress
 - Manage Plans, Subscriptions, and Payments (INR pricing)
 
@@ -63,6 +109,13 @@ Enrollments
 Progress
 - POST /progress/update/ — update progress
 - GET /progress/view/ — view progress
+Notifications & Activity
+- GET /notifications/ — list notifications
+- POST /notifications/mark-read/ — mark selected/all as read
+- POST /activity/ — log user actions
+Analytics (Instructor)
+- GET /analytics/overview/ — totals, active subs, revenue, popular course
+- GET /analytics/monthly/ — monthly revenue series (INR)
 Instructor
 - POST /courses/create/ — create a course (role=instructor)
 
@@ -75,6 +128,9 @@ Models
 - Plan(id, name, price[INR], duration_days)
 - Subscription(id, user_id, plan_id, start_date, end_date, status)
 - Payment(id, user_id, plan_id, amount[INR], payment_date)
+- Notification(id, user_id, message, is_read, created_at)
+- ActivityLog(id, user_id, action_type, action_detail, created_at)
+- AnalyticsRecord(date, total_users, active_subscriptions, revenue, popular_course)
 
 Postman
 - Import postman_collection.json

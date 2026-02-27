@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Count
-from .models import LMSUser, Course, Lesson, Enrollment, Progress, Plan, Subscription, Payment
+from .models import LMSUser, Course, Lesson, Enrollment, Progress, Plan, Subscription, Payment, Notification, ActivityLog, AnalyticsRecord
 
 admin.site.site_header = "LMS Administration"
 admin.site.site_title = "LMS Admin"
@@ -59,3 +59,23 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "plan", "amount", "payment_date")
     list_filter = ("payment_date",)
     search_fields = ("user__name", "plan__name")
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "is_read", "created_at")
+    list_filter = ("is_read", "created_at")
+    search_fields = ("user__name", "message")
+
+
+@admin.register(ActivityLog)
+class ActivityLogAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "action_type", "created_at")
+    list_filter = ("action_type", "created_at")
+    search_fields = ("user__name", "action_type", "action_detail")
+
+
+@admin.register(AnalyticsRecord)
+class AnalyticsRecordAdmin(admin.ModelAdmin):
+    list_display = ("date", "total_users", "active_subscriptions", "revenue", "popular_course")
+    search_fields = ("popular_course",)

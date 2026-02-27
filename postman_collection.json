@@ -24,6 +24,48 @@
       }
     },
     {
+      "name": "Notifications - List",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/notifications/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["notifications",""]}
+      }
+    },
+    {
+      "name": "Notifications - Mark Read",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"},{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/notifications/mark-read/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["notifications","mark-read",""]},
+        "body": {"mode": "raw", "raw": "{\n  \"mark_all\": true\n}"}
+      }
+    },
+    {
+      "name": "Activity - Log",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"},{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/activity/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["activity",""]},
+        "body": {"mode": "raw", "raw": "{\n  \"action_type\": \"view_course\",\n  \"action_detail\": \"Viewed course 1\"\n}"}
+      }
+    },
+    {
+      "name": "Analytics - Overview (Instructor)",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/analytics/overview/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["analytics","overview",""]}
+      }
+    },
+    {
+      "name": "Analytics - Monthly Revenue (Instructor)",
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+        "url": {"raw": "http://localhost:8001/analytics/monthly/", "protocol": "http", "host": ["localhost"], "port": "8001", "path": ["analytics","monthly",""]}
+      }
+    }
+    {
       "name": "Register",
       "request": {
         "method": "POST",

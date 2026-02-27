@@ -8,10 +8,13 @@ from .django_setup import setup as django_setup
 
 django_setup()
 
-from lms.models import LMSUser, Course, Enrollment, Progress, Plan, Subscription, Payment  # noqa: E402
+from lms.models import LMSUser, Course, Enrollment, Progress, Plan, Subscription, Payment, Notification, ActivityLog  # noqa: E402
 from django.db import models  # noqa: E402
 from django.db import transaction  # noqa: E402
 from django.db.models import Prefetch  # noqa: E402
+from django.db.models.functions import TruncMonth  # noqa: E402
+from django.db.models import Sum, Count  # noqa: E402
+from django.core.mail import send_mail  # noqa: E402
 
 from .schemas import (
     RegisterRequest,
@@ -24,6 +27,11 @@ from .schemas import (
     PlanOut,
     SubscribeRequest,
     PaymentOut,
+    NotificationOut,
+    MarkReadRequest,
+    ActivityLogRequest,
+    AnalyticsOverviewOut,
+    MonthlyRevenueOut,
 )
 from .auth import create_access_token, hash_password, verify_password
 from .deps import get_current_user, require_role
@@ -113,6 +121,13 @@ def course_detail(course_id: int, user=Depends(get_current_user)):
         has_access = Subscription.objects.filter(user_id=user_id, status="active", end_date__gte=djtz.now()).exists()
         if not has_access:
             raise HTTPException(status_code=403, detail="Upgrade plan to access this course")
+    # Log view activity
+    try:
+        user_id, _ = user
+        u = LMSUser.objects.get(pk=user_id)
+        ActivityLog.objects.create(user=u, action_type="view_course", action_detail=f"Viewed {c.title}")
+    except Exception:
+        pass
     return CourseOut(
         id=c.id,
         title=c.title,
@@ -133,6 +148,26 @@ def enroll(req: EnrollRequest, user=Depends(require_role("student"))):
     obj, created = Enrollment.objects.get_or_create(user=lms_user, course=course)
     if created:
         Progress.objects.create(enrollment=obj, completed_lessons=0, progress_percent=0.0)
+        ActivityLog.objects.create(user=lms_user, action_type="enroll", action_detail=f"Enrolled in {course.title}")
+        try:
+            Notification.objects.create(user=lms_user, message=f"You enrolled in {course.title}")
+            Notification.objects.create(user=course.instructor, message=f"{lms_user.name} enrolled in your course {course.title}")
+            send_mail(
+                subject="Enrollment confirmed",
+                message=f"You enrolled in {course.title}.",
+                from_email=None,
+                recipient_list=[lms_user.email],
+                fail_silently=True,
+            )
+            send_mail(
+                subject="New enrollment",
+                message=f"{lms_user.name} enrolled in your course {course.title}.",
+                from_email=None,
+                recipient_list=[course.instructor.email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
     return {"status": "ok", "enrolled": True}
 
 
@@ -227,6 +262,19 @@ def subscribe(req: SubscribeRequest, user=Depends(get_current_user)):
     end = start + timedelta(days=plan.duration_days)
     Subscription.objects.create(user_id=user_id, plan=plan, start_date=start, end_date=end, status="active")
     Payment.objects.create(user_id=user_id, plan=plan, amount=plan.price)
+    try:
+        u = LMSUser.objects.get(pk=user_id)
+        Notification.objects.create(user=u, message=f"Subscribed to {plan.name} (₹{plan.price})")
+        ActivityLog.objects.create(user=u, action_type="subscribe", action_detail=f"Bought {plan.name}")
+        send_mail(
+            subject="Subscription confirmed",
+            message=f"Your subscription to {plan.name} is active until {end.date() if hasattr(end,'date') else end}.",
+            from_email=None,
+            recipient_list=[u.email],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
     return {"status": "ok", "plan": plan.name}
 
 
@@ -248,3 +296,54 @@ def auth_register(payload: RegisterRequest):
 @app.post("/auth/login/", response_model=TokenResponse)
 def auth_login(payload: LoginRequest):
     return login(payload)
+
+
+@app.get("/notifications/", response_model=List[NotificationOut])
+def notifications(user=Depends(get_current_user)):
+    user_id, _ = user
+    qs = Notification.objects.filter(user_id=user_id).order_by("-created_at")
+    return [NotificationOut(id=n.id, message=n.message, is_read=n.is_read, created_at=n.created_at.isoformat()) for n in qs]
+
+
+@app.post("/notifications/mark-read/")
+def notifications_mark_read(payload: MarkReadRequest, user=Depends(get_current_user)):
+    user_id, _ = user
+    qs = Notification.objects.filter(user_id=user_id)
+    if payload.mark_all:
+        qs.update(is_read=True)
+    elif payload.ids:
+        qs.filter(id__in=payload.ids).update(is_read=True)
+    return {"status": "ok"}
+
+
+@app.post("/activity/")
+def activity(payload: ActivityLogRequest, user=Depends(get_current_user)):
+    user_id, _ = user
+    u = LMSUser.objects.get(pk=user_id)
+    ActivityLog.objects.create(user=u, action_type=payload.action_type, action_detail=payload.action_detail or "")
+    return {"status": "ok"}
+
+
+@app.get("/analytics/overview/", response_model=AnalyticsOverviewOut)
+def analytics_overview(user=Depends(require_role("instructor"))):
+    total_users = LMSUser.objects.count()
+    from django.utils import timezone as djtz
+    active_subs = Subscription.objects.filter(status="active", end_date__gte=djtz.now()).count()
+    revenue = Payment.objects.aggregate(s=Sum("amount"))["s"] or 0
+    popular = (
+        Course.objects.annotate(ec=Count("enrollments")).order_by("-ec").values_list("title", flat=True).first()
+    )
+    return AnalyticsOverviewOut(
+        total_users=total_users,
+        active_subscriptions=active_subs,
+        revenue_inr=float(revenue),
+        popular_course=popular or None,
+    )
+
+
+@app.get("/analytics/monthly/", response_model=List[MonthlyRevenueOut])
+def analytics_monthly(user=Depends(require_role("instructor"))):
+    data = (
+        Payment.objects.annotate(m=TruncMonth("payment_date")).values("m").annotate(s=Sum("amount")).order_by("m")
+    )
+    return [MonthlyRevenueOut(label=d["m"].strftime("%Y-%m"), value=float(d["s"] or 0)) for d in data]

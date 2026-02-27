@@ -108,3 +108,37 @@ class Payment(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user.name} - {self.plan.name} - {self.amount}"
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="notifications")
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self) -> str:
+        return f"{self.user.name} - {('read' if self.is_read else 'unread')}"
+
+
+class ActivityLog(models.Model):
+    user = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="activities")
+    action_type = models.CharField(max_length=100)
+    action_detail = models.TextField(blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self) -> str:
+        return f"{self.user.name} - {self.action_type}"
+
+
+class AnalyticsRecord(models.Model):
+    date = models.DateField()
+    total_users = models.PositiveIntegerField(default=0)
+    active_subscriptions = models.PositiveIntegerField(default=0)
+    revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    popular_course = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        unique_together = ("date",)
+
+    def __str__(self) -> str:
+        return f"{self.date} - users:{self.total_users} active:{self.active_subscriptions} revenue:{self.revenue}"
