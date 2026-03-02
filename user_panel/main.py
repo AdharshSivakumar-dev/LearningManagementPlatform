@@ -35,17 +35,21 @@ from .schemas import (
 )
 from .auth import create_access_token, hash_password, verify_password
 from .deps import get_current_user, require_role
+from user_panel.chat.router import router as chat_router
+from user_panel.notifications.router import router as notifications_ext_router
 
 app = FastAPI(title="LMS User Panel API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(chat_router)
+app.include_router(notifications_ext_router)
 
 @app.post("/token/", response_model=TokenResponse, summary="OAuth2 Password flow token endpoint")
 def token(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -59,7 +63,7 @@ def token(form_data: OAuth2PasswordRequestForm = Depends()):
     if not verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     token = create_access_token(str(user.id), user.role)
-    return TokenResponse(access_token=token)
+    return TokenResponse(access_token=token, user_id=user.id, username=user.name)
 
 
 @app.post("/register/", response_model=TokenResponse)
@@ -73,7 +77,7 @@ def register(payload: RegisterRequest):
         password_hash=hash_password(payload.password),
     )
     token = create_access_token(str(user.id), user.role)
-    return TokenResponse(access_token=token)
+    return TokenResponse(access_token=token, user_id=user.id, username=user.name)
 
 
 @app.post("/login/", response_model=TokenResponse)
@@ -87,7 +91,7 @@ def login(payload: LoginRequest):
     if not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     token = create_access_token(str(user.id), user.role)
-    return TokenResponse(access_token=token)
+    return TokenResponse(access_token=token, user_id=user.id, username=user.name)
 
 
 @app.get("/courses/", response_model=List[CourseOut])

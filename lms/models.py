@@ -7,7 +7,7 @@ class LMSUser(models.Model):
         STUDENT = "student", "Student"
         INSTRUCTOR = "instructor", "Instructor"
 
-    name = models.CharField(max_length=120)
+    name = models.CharField(max_length=120, null=True, blank=True)
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, choices=Roles.choices, default=Roles.STUDENT)
     password_hash = models.CharField(max_length=255)
@@ -142,3 +142,65 @@ class AnalyticsRecord(models.Model):
 
     def __str__(self) -> str:
         return f"{self.date} - users:{self.total_users} active:{self.active_subscriptions} revenue:{self.revenue}"
+
+
+# --- Real-time Chat Models ---
+
+class ChatRoom(models.Model):
+    class RoomType(models.TextChoices):
+        PRIVATE = "private", "Private"
+        GROUP = "group", "Group"
+
+    name = models.CharField(max_length=120, null=True, blank=True)
+    room_type = models.CharField(max_length=20, choices=RoomType.choices, default=RoomType.GROUP)
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="chat_rooms")
+    created_by = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="created_rooms", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    members = models.ManyToManyField(LMSUser, related_name="chat_rooms", blank=True)
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.room_type})"
+
+
+class Message(models.Model):
+    class MessageType(models.TextChoices):
+        TEXT = "text", "Text"
+        FILE = "file", "File"
+
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name="messages")
+    sender = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="messages")
+    sender_username = models.CharField(max_length=120)
+    content = models.TextField(blank=True)
+    message_type = models.CharField(max_length=10, choices=MessageType.choices, default=MessageType.TEXT)
+    file_url = models.URLField(blank=True)
+    file_name = models.CharField(max_length=255, blank=True)
+    file_type = models.CharField(max_length=120, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["timestamp"]
+
+    def __str__(self) -> str:
+        return f"{self.sender_username}: {self.content[:30]}"
+
+
+class FileAttachment(models.Model):
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="attachments")
+    file_path = models.CharField(max_length=500)
+    file_name = models.CharField(max_length=255)
+    file_type = models.CharField(max_length=120)
+    file_size = models.PositiveIntegerField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.file_name
+
+
+class UserStatus(models.Model):
+    user = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="status")
+    is_online = models.BooleanField(default=False)
+    last_seen = models.DateTimeField(default=timezone.now)
+
+    def __str__(self) -> str:
+        return f"{self.user.name} ({'online' if self.is_online else 'offline'})"

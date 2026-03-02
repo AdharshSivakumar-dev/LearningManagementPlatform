@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chat • Room</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Material+Symbols+Rounded" rel="stylesheet"/>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+    <style>
+      body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; height: 100vh; display: flex; flex-direction: column; }
+      .navbar { background: #fff; border-bottom: 1px solid #eee; flex-shrink: 0; }
+      .main-layout { flex: 1; display: flex; overflow: hidden; }
+      
+      /* Sidebar */
+      .sidebar { width: 320px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; flex-shrink: 0; }
+      .sidebar-header { padding: 1rem; border-bottom: 1px solid #eee; }
+      .room-list { overflow-y: auto; flex: 1; padding: 0.5rem; }
+      .room-item { border-radius: 8px; border: none; padding: 0.75rem 1rem; margin-bottom: 4px; transition: background 0.15s; }
+      .room-item:hover, .room-item.active { background-color: #f1f3f5; }
+      .room-item.active { background-color: #e7f1ff; color: #0d6efd; }
+      
+      /* Chat Area */
+      .chat-area { flex: 1; display: flex; flex-direction: column; background: #f8f9fa; position: relative; }
+      .chat-header { background: #fff; padding: 0.75rem 1.5rem; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; }
+      .messages-container { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+      
+      /* Bubbles */
+      .bubble-wrapper { display: flex; flex-direction: column; max-width: 70%; }
+      .bubble-wrapper.me { align-self: flex-end; align-items: flex-end; }
+      .bubble-wrapper.other { align-self: flex-start; align-items: flex-start; }
+      
+      .bubble { padding: 0.75rem 1rem; border-radius: 16px; position: relative; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+      .bubble.me { background-color: #0d6efd; color: #fff; border-bottom-right-radius: 4px; }
+      .bubble.other { background-color: #fff; color: #212529; border-bottom-left-radius: 4px; border: 1px solid #eee; }
+      
+      .meta { font-size: 0.75rem; margin-top: 4px; opacity: 0.7; }
+      .bubble.me .meta { color: rgba(255,255,255,0.8); text-align: right; }
+      .bubble.other .meta { color: #6c757d; }
+
+      /* Input Area */
+      .input-area { background: #fff; padding: 1rem 1.5rem; border-top: 1px solid #eee; }
+      .input-wrapper { background: #f1f3f5; border-radius: 24px; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s; }
+      .input-wrapper:focus-within { background: #fff; box-shadow: 0 0 0 2px rgba(13,110,253,0.25); }
+      .msg-input { border: none; background: transparent; flex: 1; outline: none; padding: 0.5rem; max-height: 100px; overflow-y: auto; resize: none; }
+      
+      .btn-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: none; background: transparent; color: #6c757d; transition: 0.2s; }
+      .btn-icon:hover { background: rgba(0,0,0,0.05); color: #212529; }
+      .btn-send { background: #0d6efd; color: #fff; }
+      .btn-send:hover { background: #0b5ed7; color: #fff; }
+
+      .file-preview { position: absolute; bottom: 80px; left: 1.5rem; right: 1.5rem; background: #fff; padding: 0.75rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; border: 1px solid #eee; z-index: 10; }
+      
+      @media (max-width: 768px) {
+        .sidebar { display: none; position: absolute; z-index: 100; height: 100%; box-shadow: 4px 0 12px rgba(0,0,0,0.1); }
+        .sidebar.show { display: flex; }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar px-3">
+      <div class="d-flex align-items-center gap-3">
+        <a href="/admin/chat/" class="btn btn-icon d-md-none"><span class="material-symbols-rounded">arrow_back</span></a>
+        <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" href="/admin/chat/">
+          <span class="material-symbols-rounded">forum</span> LMS Chat
+        </a>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-icon d-md-none" onclick="document.querySelector('.sidebar').classList.toggle('show')">
+          <span class="material-symbols-rounded">menu</span>
+        </button>
+        <a href="/admin/notifications/" class="position-relative btn btn-icon">
+          <span class="material-symbols-rounded">notifications</span>
+          <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light p-1 d-none"></span>
+        </a>
+        <div class="avatar bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:36px;height:36px" id="userAvatar">U</div>
+      </div>
+    </nav>
+
+    <div class="main-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0"><span class="material-symbols-rounded text-muted" style="font-size:20px">search</span></span>
+            <input id="roomSearch" class="form-control bg-light border-start-0" placeholder="Search rooms..."/>
+          </div>
+        </div>
+        <div id="roomsList" class="room-list">
+          <!-- Rooms injected here -->
+        </div>
+      </aside>
+
+      <!-- Chat Area -->
+      <section class="chat-area">
+        <header class="chat-header">
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px">
+              <span class="material-symbols-rounded">group</span>
+            </div>
+            <div>
+              <h6 class="mb-0 fw-bold" id="roomName">Loading...</h6>
+              <small class="text-muted" id="roomMeta">0 members</small>
+            </div>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-icon" data-bs-toggle="dropdown"><span class="material-symbols-rounded">more_vert</span></button>
+            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+              <li><a class="dropdown-item" href="#">View Members</a></li>
+              <li><a class="dropdown-item text-danger" href="#">Leave Room</a></li>
+            </ul>
+          </div>
+        </header>
+
+        <div id="thread" class="messages-container">
+          <!-- Messages injected here -->
+        </div>
+
+        <!-- File Preview -->
+        <div id="fileChip" class="file-preview d-none">
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-light rounded p-2"><span class="material-symbols-rounded">description</span></div>
+            <div>
+              <div class="fw-medium text-truncate" style="max-width: 200px;" id="fileName">file.txt</div>
+              <small class="text-muted">Ready to send</small>
+            </div>
+          </div>
+          <button class="btn btn-icon" id="removeFile"><span class="material-symbols-rounded">close</span></button>
+        </div>
+
+        <div class="input-area">
+          <div id="typingIndicator" class="text-muted small mb-2 ms-3" style="height:20px"></div>
+          <div class="input-wrapper">
+            <button class="btn-icon" id="pickFile"><span class="material-symbols-rounded">attach_file</span></button>
+            <input class="d-none" type="file" id="fileInput"/>
+            <textarea id="msgInput" class="msg-input" rows="1" placeholder="Type a message..."></textarea>
+            <button class="btn-icon btn-send" id="sendBtn"><span class="material-symbols-rounded">send</span></button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const api = 'http://localhost:8001';
+      const roomId = {{ room_id }};
+      const thread = document.getElementById('thread');
+      const msgInput = document.getElementById('msgInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const notifBadge = document.getElementById('notif-badge');
+      const userAvatar = document.getElementById('userAvatar');
+      
+      let ws = null;
+      let typingTimer = null;
+      let fileData = null;
+
+      // Auto-resize textarea
+      msgInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+        if(this.value === '') this.style.height = 'auto';
+      });
+
+      async function authFetch(path, opts={}){
+        const t = localStorage.getItem('token');
+        if(!t) { location.href='/admin/chat/'; return Promise.reject(); }
+        opts.headers = Object.assign({}, opts.headers || {}, { 'Authorization': 'Bearer ' + t });
+        return fetch(api + path, opts);
+      }
+
+      async function unreadCount(){
+        try{
+          const r = await authFetch('/notifications/unread-count/');
+          const j = await r.json();
+          const count = j.count || 0;
+          notifBadge.textContent = count;
+          if(count > 0) notifBadge.classList.remove('d-none');
+          else notifBadge.classList.add('d-none');
+        }catch{}
+      }
+
+      function connectNotifWS(){
+        const t = localStorage.getItem('token');
+        const uid = localStorage.getItem('user_id');
+        if(!t || !uid) return;
+        const ws = new WebSocket(`ws://localhost:8001/notifications/ws/notifications/${uid}?token=${t}`);
+        ws.onmessage = ev => { unreadCount(); };
+      }
+
+      function renderMessage(m){
+        const email = (localStorage.getItem('email')||'').toLowerCase();
+        const me = email === (m.sender_username||'').toLowerCase();
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = `bubble-wrapper ${me ? 'me' : 'other'}`;
+        
+        let content = '';
+        if(m.message_type === 'file' && m.file_url){
+          const isImage = (m.file_type||'').startsWith('image/');
+          if(isImage){
+            content = `<img src="${m.file_url}" class="img-fluid rounded" style="max-height:200px" alt="image"/>`;
+          } else {
+            content = `
+              <div class="d-flex align-items-center gap-2">
+                <div class="bg-light rounded p-2"><span class="material-symbols-rounded">description</span></div>
+                <div>
+                  <div class="fw-medium">${m.file_name||'File'}</div>
+                  <a href="${m.file_url}" target="_blank" class="small text-primary text-decoration-none">Download</a>
+                </div>
+              </div>`;
+          }
+        } else {
+          content = m.content;
+        }
+
+        wrapper.innerHTML = `
+          <div class="bubble ${me ? 'me' : 'other'}">
+            ${content}
+          </div>
+          <div class="meta">
+            ${me ? '' : m.sender_username + ' • '}${new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+          </div>
+        `;
+        
+        thread.appendChild(wrapper);
+        thread.scrollTop = thread.scrollHeight;
+      }
+
+      async function loadData(){
+        try {
+            // Room Info
+            const r1 = await authFetch(`/chat/rooms/${roomId}/`);
+            if(r1.ok){
+                const d = await r1.json();
+                document.getElementById('roomName').textContent = d.name;
+                document.getElementById('roomMeta').textContent = `${d.member_count} member${d.member_count!==1?'s':''}`;
+            }
+
+            // Messages
+            const r2 = await authFetch(`/chat/rooms/${roomId}/messages/?limit=200`);
+            const msgs = await r2.json();
+            thread.innerHTML = '';
+            for(const m of msgs){ renderMessage(m); }
+            
+            // Rooms List
+            const r3 = await authFetch('/chat/rooms/');
+            const rooms = await r3.json();
+            const listEl = document.getElementById('roomsList');
+            listEl.innerHTML = '';
+            for(const rm of rooms){
+                const active = rm.id === roomId ? 'active' : '';
+                const item = document.createElement('a');
+                item.href = `/admin/chat/room/${rm.id}/`;
+                item.className = `room-item d-flex align-items-center justify-content-between text-decoration-none text-dark ${active}`;
+                item.innerHTML = `
+                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                        <span class="material-symbols-rounded text-muted">${rm.room_type==='group'?'groups':'person'}</span>
+                        <div class="text-truncate">${rm.name}</div>
+                    </div>
+                    ${rm.id === roomId ? '' : '<span class="material-symbols-rounded small text-muted">chevron_right</span>'}
+                `;
+                listEl.appendChild(item);
+            }
+            
+            // User Avatar
+            const email = localStorage.getItem('email') || 'User';
+            userAvatar.textContent = email[0].toUpperCase();
+
+        } catch(e){ console.error(e); }
+      }
+
+      function connectWS(){
+        const t = localStorage.getItem('token');
+        if(!t) return;
+        ws = new WebSocket(`ws://localhost:8001/chat/ws/chat/${roomId}?token=${t}`);
+        ws.onopen = () => console.log('Connected');
+        ws.onmessage = ev => {
+          const data = JSON.parse(ev.data);
+          if(data.event === 'message'){ renderMessage(data); }
+          if(data.event === 'typing'){ 
+              if(data.user_id !== parseInt(localStorage.getItem('user_id'))){
+                  document.getElementById('typingIndicator').textContent = 'Someone is typing...'; 
+              }
+          }
+          if(data.event === 'stop_typing'){ document.getElementById('typingIndicator').textContent = ''; }
+        };
+      }
+
+      async function sendMessage(){
+        if(fileData){
+            const fd = new FormData();
+            fd.append('file', fileData);
+            try{
+                const r = await authFetch('/chat/upload/', { method:'POST', body: fd });
+                if(!r.ok) throw new Error('Upload failed');
+                const j = await r.json();
+                ws.send(JSON.stringify({ type:'file', file_url: j.file_url, file_name: j.file_name, file_type: j.file_type }));
+                fileData = null;
+                document.getElementById('fileChip').classList.add('d-none');
+            }catch(e){ alert('Upload failed'); }
+        } else if(msgInput.value.trim()){
+            ws.send(JSON.stringify({ type:'text', content: msgInput.value.trim() }));
+            msgInput.value = '';
+            msgInput.style.height = 'auto';
+            ws.send(JSON.stringify({ type:'stop_typing' }));
+        }
+      }
+
+      sendBtn.onclick = sendMessage;
+      msgInput.onkeydown = (e) => {
+          if(e.key === 'Enter' && !e.shiftKey){
+              e.preventDefault();
+              sendMessage();
+          }
+      };
+
+      msgInput.addEventListener('input', () => {
+        ws?.send(JSON.stringify({ type:'typing' }));
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => ws?.send(JSON.stringify({ type:'stop_typing' })), 1000);
+      });
+
+      document.getElementById('pickFile').onclick = () => document.getElementById('fileInput').click();
+      document.getElementById('fileInput').onchange = (e) => {
+        const f = e.target.files[0];
+        if(!f) return;
+        fileData = f;
+        document.getElementById('fileName').textContent = f.name;
+        document.getElementById('fileChip').classList.remove('d-none');
+      };
+      document.getElementById('removeFile').onclick = () => {
+        fileData = null;
+        document.getElementById('fileChip').classList.add('d-none');
+        document.getElementById('fileInput').value = '';
+      };
+
+      loadData();
+      connectWS();
+      unreadCount();
+      connectNotifWS();
+    </script>
+  </body>
+</html>

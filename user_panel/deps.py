@@ -8,6 +8,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token/")
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> Tuple[int, str]:
+    # Support "Bearer <token>" format
+    if token.startswith("Bearer "):
+        token = token.split(" ")[1]
+    
     payload = decode_token(token)
     if not payload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")

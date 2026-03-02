@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Count
-from .models import LMSUser, Course, Lesson, Enrollment, Progress, Plan, Subscription, Payment, Notification, ActivityLog, AnalyticsRecord
+from .models import LMSUser, Course, Lesson, Enrollment, Progress, Plan, Subscription, Payment, Notification, ActivityLog, AnalyticsRecord, ChatRoom, Message, FileAttachment, UserStatus
 
 admin.site.site_header = "LMS Administration"
 admin.site.site_title = "LMS Admin"
@@ -79,3 +79,31 @@ class ActivityLogAdmin(admin.ModelAdmin):
 class AnalyticsRecordAdmin(admin.ModelAdmin):
     list_display = ("date", "total_users", "active_subscriptions", "revenue", "popular_course")
     search_fields = ("popular_course",)
+
+
+@admin.register(ChatRoom)
+class ChatRoomAdmin(admin.ModelAdmin):
+    list_display = ("name", "room_type", "created_by", "created_at", "members_count")
+    search_fields = ("name",)
+    list_filter = ("room_type",)
+
+    def members_count(self, obj):
+        return obj.members.count()
+
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ("sender_username", "room", "message_type", "timestamp", "is_deleted")
+    search_fields = ("content", "sender_username")
+    list_filter = ("message_type", "is_deleted")
+    date_hierarchy = "timestamp"
+
+
+@admin.register(FileAttachment)
+class FileAttachmentAdmin(admin.ModelAdmin):
+    list_display = ("file_name", "file_type", "file_size", "uploaded_at")
+
+
+@admin.register(UserStatus)
+class UserStatusAdmin(admin.ModelAdmin):
+    list_display = ("user", "is_online", "last_seen")
