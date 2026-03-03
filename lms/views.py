@@ -1,12 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Avg
 from django.db.models.functions import TruncDate, TruncMonth
 from django.utils import timezone as djtz
 from datetime import timedelta
 import json
-from .models import Course, Enrollment, Progress, LMSUser, Subscription, Payment, ChatRoom, Message, FileAttachment, UserStatus, Notification, ActivityLog
+from .models import Course, Enrollment, Progress, LMSUser, Subscription, Payment, ChatRoom, Message, FileAttachment, UserStatus, Notification, ActivityLog, Assignment, Submission, Attendance
 
 def staff_member_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
@@ -51,6 +51,13 @@ def admin_dashboard(request):
         for d in activity_data if d["day"]
     ]
     recent_notifications = Notification.objects.select_related("user").order_by("-created_at")[:6]
+
+    # New Analytics
+    total_assignments = Assignment.objects.count()
+    total_submissions = Submission.objects.count()
+    total_attendance = Attendance.objects.count()
+    avg_attendance = (Attendance.objects.filter(status="present").count() / total_attendance * 100 if total_attendance > 0 else 0)
+
     return render(
         request,
         "lms/dashboard.html",
@@ -62,6 +69,9 @@ def admin_dashboard(request):
             "revenue_series": json.dumps(revenue_series),
             "activity_series": json.dumps(activity_series),
             "recent_notifications": recent_notifications,
+            "total_assignments": total_assignments,
+            "total_submissions": total_submissions,
+            "avg_attendance": f"{avg_attendance:.2f}",
         },
     )
 
@@ -141,3 +151,27 @@ def chat_room_page(request, room_id: int):
 @staff_member_required
 def notifications_page(request):
     return render(request, "lms/notifications.html")
+
+@staff_member_required
+def course_analytics(request):
+    course_id = request.GET.get("course_id")
+    if not course_id:
+        return JsonResponse({"error": "course_id is required"}, status=400)
+
+    try:
+        course = Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        return JsonResponse({"error": "Course not found"}, status=404)
+
+    total_students = Enrollment.objects.filter(course=course).count()
+    total_attendance = Attendance.objects.filter(course=course).count()
+    avg_attendance = (Attendance.objects.filter(course=course, status="present").count() / total_attendance * 100 if total_attendance > 0 else 0)
+    total_assignments = Assignment.objects.filter(course=course).count()
+    submissions_count = Submission.objects.filter(assignment__course=course).count()
+
+    return JsonResponse({
+        "total_students": total_students,
+        "avg_attendance": avg_attendance,
+        "total_assignments": total_assignments,
+        "submissions_count": submissions_count,
+    })

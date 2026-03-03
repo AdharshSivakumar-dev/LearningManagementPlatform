@@ -65,6 +65,7 @@ class PaymentOut(BaseModel):
 class NotificationOut(BaseModel):
     id: int
     message: str
+    link: str | None
     is_read: bool
     created_at: str
 

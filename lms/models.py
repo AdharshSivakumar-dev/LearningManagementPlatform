@@ -113,6 +113,7 @@ class Payment(models.Model):
 class Notification(models.Model):
     user = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="notifications")
     message = models.TextField()
+    link = models.URLField(blank=True, null=True)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -204,3 +205,50 @@ class UserStatus(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user.name} ({'online' if self.is_online else 'offline'})"
+
+
+# --- Attendance and Assignments ---
+
+class Attendance(models.Model):
+    class Status(models.TextChoices):
+        PRESENT = "present", "Present"
+        ABSENT = "absent", "Absent"
+
+    student = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="attendances")
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="attendances")
+    date = models.DateField()
+    status = models.CharField(max_length=10, choices=Status.choices)
+
+    class Meta:
+        unique_together = ("student", "course", "date")
+
+    def __str__(self):
+        return f"{self.student.name} - {self.course.title} on {self.date}: {self.status}"
+
+
+class Assignment(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="assignments")
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    deadline = models.DateTimeField()
+    file_url = models.URLField(blank=True, null=True)
+    created_by = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="created_assignments")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Submission(models.Model):
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name="submissions")
+    student = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="submissions")
+    file_url = models.URLField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    grade = models.CharField(max_length=10, blank=True, null=True)
+    remarks = models.TextField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ("assignment", "student")
+
+    def __str__(self):
+        return f"Submission for {self.assignment.title} by {self.student.name}"

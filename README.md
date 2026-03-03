@@ -1,110 +1,49 @@
 # Learning Management Platform
 
-A comprehensive LMS platform featuring a Django-based Admin Panel and a FastAPI-powered User Panel. This project includes course management, subscriptions, real-time chat, and analytics.
+A comprehensive LMS platform featuring a Django-based Admin Panel and a FastAPI-powered User Panel. This project includes course management, subscriptions, real-time chat, and advanced academic modules.
 
-## Features
+## Recent Updates
 
-- **Admin Panel (Django):**
-  - Course & Lesson Management
-  - User Management (Instructors & Students)
-  - Dashboard with Revenue & Enrollment Analytics
-  - Real-time Chat Analytics
-  - Notification Management
+The following features were implemented to enhance student tracking and academic management:
 
-- **User Panel (FastAPI):**
-  - JWT Authentication (Register/Login)
-  - Course Browsing & Enrollment
-  - Progress Tracking
-  - Real-time Chat (Private & Group) with WebSocket
-  - File Sharing in Chat
-  - Real-time Notifications
+- **Attendance Tracking:** Fully integrated system to mark student attendance per course. Students and instructors can view attendance records, with automatic percentage calculations for performance monitoring.
+- **Assignment Management:** Robust module for instructors to create assignments with deadlines. Students can submit their work via file uploads, and instructors can provide grades and feedback directly through the API.
+- **Course Analytics:** Server-side aggregation endpoints providing JSON data for course performance, including student enrollment counts, average attendance rates, and submission statistics.
+- **Automated Notifications:** Event-driven notification system that triggers both in-app and email alerts when assignments are created, graded, or when attendance is marked.
 
 ## Tech Stack
 
 - **Backend:** Python 3.11+, Django 4.2, FastAPI, Uvicorn
-- **Database:** PostgreSQL (production) or SQLite (dev)
+- **Database:** SQLite (Development)
 - **Real-time:** WebSockets (FastAPI), Redis (Pub/Sub)
-- **Frontend:** Django Templates, Bootstrap 5, Chart.js
+- **Email:** SMTP Integration for automated alerts
 
-## Setup Guide
+## Setup and Installation
 
-### Prerequisites
-- Python 3.11+
-- Redis (for real-time features)
-
-### Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository_url>
-    cd LearningManagementPlatform
-    ```
-
-2.  **Create and activate a virtual environment:**
+1.  **Environment Setup:**
     ```bash
     python -m venv .venv
-    # Windows
-    .\.venv\Scripts\Activate
-    # Linux/Mac
-    source .venv/bin/activate
-    ```
-
-3.  **Install dependencies:**
-    ```bash
+    source .venv/bin/activate  # .\ .venv\Scripts\Activate on Windows
     pip install -r requirements.txt
     ```
 
-4.  **Configure Environment:**
-    Copy `.env.example` to `.env` and update the values:
-    ```bash
-    cp .env.example .env
-    ```
-    Ensure `REDIS_URL` is set correctly (e.g., `redis://localhost:6379`).
-
-5.  **Initialize Database:**
+2.  **Database Initialization:**
     ```bash
     python manage.py migrate
     python manage.py createsuperuser
     ```
 
-### Running the Application
+3.  **Running the Platform:**
+    - Start Redis server
+    - Django (Admin/Analytics): `python manage.py runserver`
+    - FastAPI (User Panel/API): `uvicorn user_panel.main:app --port 8001`
 
-You need to run both the Django server (Frontend/Admin) and the FastAPI server (API/WebSockets).
+## API Documentation
 
-1.  **Start Redis Server:**
-    ```bash
-    redis-server
-    ```
-
-2.  **Start Django Server (Terminal 1):**
-    ```bash
-    python manage.py runserver 0.0.0.0:8000
-    ```
-
-3.  **Start FastAPI Server (Terminal 2):**
-    ```bash
-    uvicorn user_panel.main:app --host 0.0.0.0 --port 8001
-    ```
-
-### Accessing the App
-
-- **Admin Dashboard:** [http://localhost:8000/admin/dashboard/](http://localhost:8000/admin/dashboard/)
-- **Chat Interface:** [http://localhost:8000/admin/chat/](http://localhost:8000/admin/chat/)
-- **API Documentation:** [http://localhost:8001/docs](http://localhost:8001/docs)
-
-## Project Structure
-
-- `lms/`: Django app for Admin, Models, and Templates.
-- `user_panel/`: FastAPI app for API endpoints and WebSockets.
-- `lms_admin/`: Django project settings.
-- `requirements.txt`: Python dependencies.
-
-## Key Functionalities
-
-- **Chat:** Users can create private or group rooms, exchange messages, and share files. Real-time updates are handled via WebSockets and Redis.
-- **Analytics:** Admins can view chat activity, active rooms, and file sharing statistics.
-- **Notifications:** Users receive real-time notifications for new messages.
+- **Interactive Swagger UI:** `http://localhost:8001/docs`
+- **Django Admin Panel:** `http://localhost:8000/admin/`
+- **Course Analytics Endpoint:** `http://localhost:8000/analytics/dashboard/?course_id={id}`
 
 ## License
 
-This project is open-source and available under the MIT License.
+This project is licensed under the MIT License.

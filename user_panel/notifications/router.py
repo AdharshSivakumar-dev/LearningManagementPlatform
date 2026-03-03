@@ -11,17 +11,15 @@ router = APIRouter(prefix="/notifications", tags=["notifications-extended"])
 
 
 @router.get("/", response_model=List[NotificationOut])
-def list_notifications(user=Depends(get_current_user)):
-    user_id, _ = user
-    qs = Notification.objects.filter(user_id=user_id).order_by("-created_at")
+def list_notifications(user: LMSUser = Depends(get_current_user)):
+    qs = Notification.objects.filter(user=user).order_by("-created_at")
     return [NotificationOut(id=n.id, message=n.message, is_read=n.is_read, created_at=n.created_at.isoformat()) for n in qs]
 
 
 @router.patch("/{notif_id}/read/")
-def mark_read(notif_id: int, user=Depends(get_current_user)):
-    user_id, _ = user
+def mark_read(notif_id: int, user: LMSUser = Depends(get_current_user)):
     try:
-        n = Notification.objects.get(pk=notif_id, user_id=user_id)
+        n = Notification.objects.get(pk=notif_id, user=user)
     except Notification.DoesNotExist:
         raise HTTPException(status_code=404, detail="Notification not found")
     n.is_read = True
@@ -30,16 +28,14 @@ def mark_read(notif_id: int, user=Depends(get_current_user)):
 
 
 @router.patch("/read-all/")
-def read_all(user=Depends(get_current_user)):
-    user_id, _ = user
-    Notification.objects.filter(user_id=user_id, is_read=False).update(is_read=True)
+def read_all(user: LMSUser = Depends(get_current_user)):
+    Notification.objects.filter(user=user, is_read=False).update(is_read=True)
     return {"status": "ok"}
 
 
 @router.get("/unread-count/")
-def unread_count(user=Depends(get_current_user)):
-    user_id, _ = user
-    c = Notification.objects.filter(user_id=user_id, is_read=False).count()
+def unread_count(user: LMSUser = Depends(get_current_user)):
+    c = Notification.objects.filter(user=user, is_read=False).count()
     return {"count": c}
 
 

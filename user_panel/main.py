@@ -37,6 +37,8 @@ from .auth import create_access_token, hash_password, verify_password
 from .deps import get_current_user, require_role
 from user_panel.chat.router import router as chat_router
 from user_panel.notifications.router import router as notifications_ext_router
+from user_panel.attendance.router import router as attendance_router
+from user_panel.assignments.router import router as assignments_router
 
 app = FastAPI(title="LMS User Panel API", version="1.0.0")
 
@@ -50,6 +52,8 @@ app.add_middleware(
 
 app.include_router(chat_router)
 app.include_router(notifications_ext_router)
+app.include_router(attendance_router)
+app.include_router(assignments_router)
 
 @app.post("/token/", response_model=TokenResponse, summary="OAuth2 Password flow token endpoint")
 def token(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -95,10 +99,9 @@ def login(payload: LoginRequest):
 
 
 @app.get("/courses/", response_model=List[CourseOut])
-def list_courses(user=Depends(get_current_user)):
-    user_id, _ = user
+def list_courses(user: LMSUser = Depends(get_current_user)):
     from django.utils import timezone as djtz
-    valid_sub = Subscription.objects.filter(user_id=user_id, status="active", end_date__gte=djtz.now()).exists()
+    valid_sub = Subscription.objects.filter(user=user, status="active", end_date__gte=djtz.now()).exists()
     base = Course.objects.select_related("instructor").filter(status="published")
     qs = base if valid_sub else base.filter(is_premium=False)
     return [
@@ -114,22 +117,19 @@ def list_courses(user=Depends(get_current_user)):
 
 
 @app.get("/courses/{course_id}", response_model=CourseOut)
-def course_detail(course_id: int, user=Depends(get_current_user)):
+def course_detail(course_id: int, user: LMSUser = Depends(get_current_user)):
     from django.utils import timezone as djtz
     try:
         c = Course.objects.select_related("instructor").get(pk=course_id, status="published")
     except Course.DoesNotExist:
         raise HTTPException(status_code=404, detail="Course not found")
     if c.is_premium:
-        user_id, _ = user
-        has_access = Subscription.objects.filter(user_id=user_id, status="active", end_date__gte=djtz.now()).exists()
+        has_access = Subscription.objects.filter(user=user, status="active", end_date__gte=djtz.now()).exists()
         if not has_access:
             raise HTTPException(status_code=403, detail="Upgrade plan to access this course")
     # Log view activity
     try:
-        user_id, _ = user
-        u = LMSUser.objects.get(pk=user_id)
-        ActivityLog.objects.create(user=u, action_type="view_course", action_detail=f"Viewed {c.title}")
+        ActivityLog.objects.create(user=user, action_type="view_course", action_detail=f"Viewed {c.title}")
     except Exception:
         pass
     return CourseOut(
@@ -142,30 +142,28 @@ def course_detail(course_id: int, user=Depends(get_current_user)):
 
 
 @app.post("/enroll/")
-def enroll(req: EnrollRequest, user=Depends(require_role("student"))):
-    user_id, _ = user
+def enroll(req: EnrollRequest, user: LMSUser = Depends(require_role("student"))):
     try:
         course = Course.objects.get(pk=req.course_id, status="published")
     except Course.DoesNotExist:
         raise HTTPException(status_code=404, detail="Course not found")
-    lms_user = LMSUser.objects.get(pk=user_id)
-    obj, created = Enrollment.objects.get_or_create(user=lms_user, course=course)
+    obj, created = Enrollment.objects.get_or_create(user=user, course=course)
     if created:
         Progress.objects.create(enrollment=obj, completed_lessons=0, progress_percent=0.0)
-        ActivityLog.objects.create(user=lms_user, action_type="enroll", action_detail=f"Enrolled in {course.title}")
+        ActivityLog.objects.create(user=user, action_type="enroll", action_detail=f"Enrolled in {course.title}")
         try:
-            Notification.objects.create(user=lms_user, message=f"You enrolled in {course.title}")
-            Notification.objects.create(user=course.instructor, message=f"{lms_user.name} enrolled in your course {course.title}")
+            Notification.objects.create(user=user, message=f"You enrolled in {course.title}")
+            Notification.objects.create(user=course.instructor, message=f"{user.name} enrolled in your course {course.title}")
             send_mail(
                 subject="Enrollment confirmed",
                 message=f"You enrolled in {course.title}.",
                 from_email=None,
-                recipient_list=[lms_user.email],
+                recipient_list=[user.email],
                 fail_silently=True,
             )
             send_mail(
                 subject="New enrollment",
-                message=f"{lms_user.name} enrolled in your course {course.title}.",
+                message=f"{user.name} enrolled in your course {course.title}.",
                 from_email=None,
                 recipient_list=[course.instructor.email],
                 fail_silently=True,
@@ -176,9 +174,8 @@ def enroll(req: EnrollRequest, user=Depends(require_role("student"))):
 
 
 @app.get("/my-courses/", response_model=List[CourseOut])
-def my_courses(user=Depends(require_role("student"))):
-    user_id, _ = user
-    enrollments = Enrollment.objects.select_related("course__instructor").filter(user_id=user_id)
+def my_courses(user: LMSUser = Depends(require_role("student"))):
+    enrollments = Enrollment.objects.select_related("course__instructor").filter(user=user)
     result = []
     for e in enrollments:
         c = e.course
@@ -195,14 +192,13 @@ def my_courses(user=Depends(require_role("student"))):
 
 
 @app.post("/progress/update/")
-def progress_update(req: ProgressUpdateRequest, user=Depends(get_current_user)):
-    user_id, role = user
+def progress_update(req: ProgressUpdateRequest, user: LMSUser = Depends(get_current_user)):
     try:
-        enrollment = Enrollment.objects.select_related("course").get(course_id=req.course_id, user_id=user_id)
+        enrollment = Enrollment.objects.select_related("course").get(course_id=req.course_id, user=user)
     except Enrollment.DoesNotExist:
         raise HTTPException(status_code=404, detail="Enrollment not found")
 
-    if role not in ("student", "instructor"):
+    if user.role not in ("student", "instructor"):
         raise HTTPException(status_code=403, detail="Forbidden")
 
     progress = getattr(enrollment, "progress", None)
@@ -215,13 +211,12 @@ def progress_update(req: ProgressUpdateRequest, user=Depends(get_current_user)):
 
 
 @app.get("/progress/view/", response_model=List[ProgressOut])
-def progress_view(user=Depends(get_current_user)):
-    user_id, role = user
-    if role == "student":
-        qs = Progress.objects.select_related("enrollment__course").filter(enrollment__user_id=user_id)
+def progress_view(user: LMSUser = Depends(get_current_user)):
+    if user.role == "student":
+        qs = Progress.objects.select_related("enrollment__course").filter(enrollment__user=user)
     else:
         # instructors see progress for their courses
-        qs = Progress.objects.select_related("enrollment__course").filter(enrollment__course__instructor_id=user_id)
+        qs = Progress.objects.select_related("enrollment__course").filter(enrollment__course__instructor=user)
     return [
         ProgressOut(
             course_id=p.enrollment.course_id,
@@ -234,13 +229,11 @@ def progress_view(user=Depends(get_current_user)):
 
 # Instructor-only: create and manage courses
 @app.post("/courses/create/")
-def create_course(payload: CourseOut, user=Depends(require_role("instructor"))):
-    user_id, _ = user
-    creator = LMSUser.objects.get(pk=user_id)
+def create_course(payload: CourseOut, user: LMSUser = Depends(require_role("instructor"))):
     course = Course.objects.create(
         title=payload.title,
         description=payload.description,
-        instructor=creator,
+        instructor=user,
         status=payload.status or "draft",
     )
     return {"status": "ok", "course_id": course.id}
@@ -255,26 +248,24 @@ def list_plans():
 
 
 @app.post("/subscribe/")
-def subscribe(req: SubscribeRequest, user=Depends(get_current_user)):
+def subscribe(req: SubscribeRequest, user: LMSUser = Depends(get_current_user)):
     from django.utils import timezone as djtz
-    user_id, _ = user
     try:
         plan = Plan.objects.get(pk=req.plan_id)
     except Plan.DoesNotExist:
         raise HTTPException(status_code=404, detail="Plan not found")
     start = djtz.now()
     end = start + timedelta(days=plan.duration_days)
-    Subscription.objects.create(user_id=user_id, plan=plan, start_date=start, end_date=end, status="active")
-    Payment.objects.create(user_id=user_id, plan=plan, amount=plan.price)
+    Subscription.objects.create(user=user, plan=plan, start_date=start, end_date=end, status="active")
+    Payment.objects.create(user=user, plan=plan, amount=plan.price)
     try:
-        u = LMSUser.objects.get(pk=user_id)
-        Notification.objects.create(user=u, message=f"Subscribed to {plan.name} (₹{plan.price})")
-        ActivityLog.objects.create(user=u, action_type="subscribe", action_detail=f"Bought {plan.name}")
+        Notification.objects.create(user=user, message=f"Subscribed to {plan.name} (₹{plan.price})")
+        ActivityLog.objects.create(user=user, action_type="subscribe", action_detail=f"Bought {plan.name}")
         send_mail(
             subject="Subscription confirmed",
             message=f"Your subscription to {plan.name} is active until {end.date() if hasattr(end,'date') else end}.",
             from_email=None,
-            recipient_list=[u.email],
+            recipient_list=[user.email],
             fail_silently=True,
         )
     except Exception:
@@ -283,11 +274,10 @@ def subscribe(req: SubscribeRequest, user=Depends(get_current_user)):
 
 
 @app.get("/payments/", response_model=List[PaymentOut])
-def list_payments(user=Depends(get_current_user)):
-    user_id, _ = user
+def list_payments(user: LMSUser = Depends(get_current_user)):
     return [
         PaymentOut(plan_name=p.plan.name, amount=float(p.amount), payment_date=p.payment_date.isoformat())
-        for p in Payment.objects.select_related("plan").filter(user_id=user_id).order_by("-payment_date")
+        for p in Payment.objects.select_related("plan").filter(user=user).order_by("-payment_date")
     ]
 
 
@@ -303,16 +293,20 @@ def auth_login(payload: LoginRequest):
 
 
 @app.get("/notifications/", response_model=List[NotificationOut])
-def notifications(user=Depends(get_current_user)):
-    user_id, _ = user
-    qs = Notification.objects.filter(user_id=user_id).order_by("-created_at")
-    return [NotificationOut(id=n.id, message=n.message, is_read=n.is_read, created_at=n.created_at.isoformat()) for n in qs]
+@app.get("/notifications/{user_id}/", response_model=List[NotificationOut])
+def notifications(user_id: int | None = None, user: LMSUser = Depends(get_current_user)):
+    # If user_id is provided, ensure it matches the authenticated user
+    if user_id is not None and user.id != user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    
+    qs = Notification.objects.filter(user=user).order_by("-created_at")
+    return [NotificationOut(id=n.id, message=n.message, link=n.link, is_read=n.is_read, created_at=n.created_at.isoformat()) for n in qs]
 
 
 @app.post("/notifications/mark-read/")
-def notifications_mark_read(payload: MarkReadRequest, user=Depends(get_current_user)):
-    user_id, _ = user
-    qs = Notification.objects.filter(user_id=user_id)
+@app.post("/notifications/mark-read")
+def notifications_mark_read(payload: MarkReadRequest, user: LMSUser = Depends(get_current_user)):
+    qs = Notification.objects.filter(user=user)
     if payload.mark_all:
         qs.update(is_read=True)
     elif payload.ids:
@@ -321,10 +315,8 @@ def notifications_mark_read(payload: MarkReadRequest, user=Depends(get_current_u
 
 
 @app.post("/activity/")
-def activity(payload: ActivityLogRequest, user=Depends(get_current_user)):
-    user_id, _ = user
-    u = LMSUser.objects.get(pk=user_id)
-    ActivityLog.objects.create(user=u, action_type=payload.action_type, action_detail=payload.action_detail or "")
+def activity(payload: ActivityLogRequest, user: LMSUser = Depends(get_current_user)):
+    ActivityLog.objects.create(user=user, action_type=payload.action_type, action_detail=payload.action_detail or "")
     return {"status": "ok"}
 
 

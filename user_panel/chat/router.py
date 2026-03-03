@@ -26,21 +26,18 @@ ALLOWED_MIME = {
 
 
 @router.get("/rooms/", response_model=List[ChatRoomOut])
-def list_rooms(user=Depends(get_current_user)):
-    user_id, _ = user
-    rooms = ChatRoom.objects.filter(members__id=user_id).distinct()
+def list_rooms(user: LMSUser = Depends(get_current_user)):
+    rooms = ChatRoom.objects.filter(members=user).distinct()
     return [ChatRoomOut(id=r.id, name=r.name, room_type=r.room_type, member_count=r.members.count()) for r in rooms]
 
 
 @router.post("/rooms/", response_model=ChatRoomOut)
-def create_room(payload: CreateRoomRequest, user=Depends(get_current_user)):
-    user_id, _ = user
-    creator = LMSUser.objects.get(pk=user_id)
+def create_room(payload: CreateRoomRequest, user: LMSUser = Depends(get_current_user)):
     # Ensure name is unique or handle it? The model doesn't enforce unique name, but let's just create.
     # Actually, for private rooms, maybe we should check if one exists with same members?
     # For now, let's just create.
-    room = ChatRoom.objects.create(name=payload.name, room_type=payload.room_type, created_by=creator)
-    room.members.add(creator)
+    room = ChatRoom.objects.create(name=payload.name, room_type=payload.room_type, created_by=user)
+    room.members.add(user)
     if payload.member_ids:
         for mid in payload.member_ids:
             try:
@@ -52,9 +49,8 @@ def create_room(payload: CreateRoomRequest, user=Depends(get_current_user)):
 
 
 @router.get("/rooms/{room_id}/messages/", response_model=List[MessageOut])
-def room_messages(room_id: int, limit: int = Query(50, le=200), user=Depends(get_current_user)):
-    user_id, _ = user
-    if not ChatRoom.objects.filter(pk=room_id, members__id=user_id).exists():
+def room_messages(room_id: int, limit: int = Query(50, le=200), user: LMSUser = Depends(get_current_user)):
+    if not ChatRoom.objects.filter(pk=room_id, members=user).exists():
         raise HTTPException(status_code=403, detail="Not a room member")
     msgs = Message.objects.filter(room_id=room_id).order_by("-timestamp")[:limit][::-1]
     return [
@@ -67,18 +63,17 @@ def room_messages(room_id: int, limit: int = Query(50, le=200), user=Depends(get
 
 
 @router.post("/rooms/{room_id}/join/")
-def join_room(room_id: int, user=Depends(get_current_user)):
-    user_id, _ = user
+def join_room(room_id: int, user: LMSUser = Depends(get_current_user)):
     try:
         room = ChatRoom.objects.get(pk=room_id)
     except ChatRoom.DoesNotExist:
         raise HTTPException(status_code=404, detail="Room not found")
-    room.members.add(user_id)
+    room.members.add(user)
     return {"status": "ok"}
 
 
 @router.post("/upload/", response_model=UploadResponse)
-def upload_file(file: UploadFile = File(...), user=Depends(get_current_user)):
+def upload_file(file: UploadFile = File(...), user: LMSUser = Depends(get_current_user)):
     if file.content_type not in ALLOWED_MIME:
         raise HTTPException(status_code=400, detail="Unsupported file type")
     data = file.file.read()
@@ -98,8 +93,7 @@ def upload_file(file: UploadFile = File(...), user=Depends(get_current_user)):
 
 
 @router.get("/rooms/{room_id}/")
-def room_detail(room_id: int, user=Depends(get_current_user)):
-    user_id, _ = user
+def room_detail(room_id: int, user: LMSUser = Depends(get_current_user)):
     try:
         r = ChatRoom.objects.get(pk=room_id)
     except ChatRoom.DoesNotExist:

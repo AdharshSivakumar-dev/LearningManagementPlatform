@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.db.models import Count
-from .models import LMSUser, Course, Lesson, Enrollment, Progress, Plan, Subscription, Payment, Notification, ActivityLog, AnalyticsRecord, ChatRoom, Message, FileAttachment, UserStatus
+from .models import (
+    LMSUser, Course, Lesson, Enrollment, Progress, Plan, Subscription, 
+    Payment, Notification, ActivityLog, AnalyticsRecord, ChatRoom, Message, 
+    FileAttachment, UserStatus, Attendance, Assignment, Submission
+)
 
 admin.site.site_header = "LMS Administration"
 admin.site.site_title = "LMS Admin"
@@ -107,3 +111,24 @@ class FileAttachmentAdmin(admin.ModelAdmin):
 @admin.register(UserStatus)
 class UserStatusAdmin(admin.ModelAdmin):
     list_display = ("user", "is_online", "last_seen")
+
+
+@admin.register(Attendance)
+class AttendanceAdmin(admin.ModelAdmin):
+    list_display = ("student", "course", "date", "status")
+    list_filter = ("date", "status")
+    search_fields = ("student__name", "course__title")
+
+
+@admin.register(Assignment)
+class AssignmentAdmin(admin.ModelAdmin):
+    list_display = ("title", "course", "deadline", "created_by")
+    list_filter = ("deadline",)
+    search_fields = ("title", "course__title")
+
+
+@admin.register(Submission)
+class SubmissionAdmin(admin.ModelAdmin):
+    list_display = ("assignment", "student", "submitted_at", "grade")
+    list_filter = ("submitted_at", "grade")
+    search_fields = ("assignment__title", "student__name")
