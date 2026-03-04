@@ -252,3 +252,44 @@ class Submission(models.Model):
 
     def __str__(self):
         return f"Submission for {self.assignment.title} by {self.student.name}"
+
+
+# --- Social Authentication ---
+
+class SocialAccount(models.Model):
+    class Provider(models.TextChoices):
+        GOOGLE = "google", "Google"
+        FACEBOOK = "facebook", "Facebook"
+        GITHUB = "github", "GitHub"
+
+    user = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="social_accounts")
+    provider = models.CharField(max_length=20, choices=Provider.choices)
+    provider_user_id = models.CharField(max_length=255)
+    provider_email = models.EmailField(blank=True)
+    access_token = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("provider", "provider_user_id")
+
+    def __str__(self) -> str:
+        return f"{self.user.name} via {self.provider}"
+
+
+class OTPLog(models.Model):
+    class Method(models.TextChoices):
+        EMAIL = "email", "Email"
+
+    email = models.EmailField()
+    otp_code = models.CharField(max_length=6)
+    method = models.CharField(max_length=10, choices=Method.choices, default=Method.EMAIL)
+    is_used = models.BooleanField(default=False)
+    expires_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self) -> bool:
+        from django.utils import timezone
+        return not self.is_used and self.expires_at >= timezone.now()
+
+    def __str__(self) -> str:
+        return f"OTP for {self.email} ({'used' if self.is_used else 'active'})"

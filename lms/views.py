@@ -152,6 +152,12 @@ def chat_room_page(request, room_id: int):
 def notifications_page(request):
     return render(request, "lms/notifications.html")
 
+def login_page(request):
+    """Render the unified login / sign-up page."""
+    # If user already has a session token via query param from OAuth, just render
+    return render(request, "lms/login.html")
+
+
 @staff_member_required
 def course_analytics(request):
     course_id = request.GET.get("course_id")
@@ -175,3 +181,17 @@ def course_analytics(request):
         "total_assignments": total_assignments,
         "submissions_count": submissions_count,
     })
+
+def auth_login_proxy(request, provider):
+    query = request.META.get('QUERY_STRING', '')
+    url = f"http://localhost:8001/auth/{provider}/"
+    if query:
+        url += f"?{query}"
+    return redirect(url)
+
+def auth_callback_proxy(request, provider):
+    query = request.META.get('QUERY_STRING', '')
+    url = f"http://localhost:8001/auth/{provider}/callback/"
+    if query:
+        url += f"?{query}"
+    return redirect(url)

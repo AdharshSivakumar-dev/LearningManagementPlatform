@@ -39,6 +39,10 @@ from user_panel.chat.router import router as chat_router
 from user_panel.notifications.router import router as notifications_ext_router
 from user_panel.attendance.router import router as attendance_router
 from user_panel.assignments.router import router as assignments_router
+from user_panel.auth_google import router as google_router
+from user_panel.auth_facebook import router as facebook_router
+from user_panel.auth_github import router as github_router
+from user_panel.auth_otp import router as otp_router
 
 app = FastAPI(title="LMS User Panel API", version="1.0.0")
 
@@ -54,6 +58,10 @@ app.include_router(chat_router)
 app.include_router(notifications_ext_router)
 app.include_router(attendance_router)
 app.include_router(assignments_router)
+app.include_router(google_router)
+app.include_router(facebook_router)
+app.include_router(github_router)
+app.include_router(otp_router)
 
 @app.post("/token/", response_model=TokenResponse, summary="OAuth2 Password flow token endpoint")
 def token(form_data: OAuth2PasswordRequestForm = Depends()):

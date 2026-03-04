@@ -3,7 +3,8 @@ from django.db.models import Count
 from .models import (
     LMSUser, Course, Lesson, Enrollment, Progress, Plan, Subscription, 
     Payment, Notification, ActivityLog, AnalyticsRecord, ChatRoom, Message, 
-    FileAttachment, UserStatus, Attendance, Assignment, Submission
+    FileAttachment, UserStatus, Attendance, Assignment, Submission,
+    SocialAccount, OTPLog
 )
 
 admin.site.site_header = "LMS Administration"
@@ -132,3 +133,21 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_display = ("assignment", "student", "submitted_at", "grade")
     list_filter = ("submitted_at", "grade")
     search_fields = ("assignment__title", "student__name")
+
+
+@admin.register(SocialAccount)
+class SocialAccountAdmin(admin.ModelAdmin):
+    list_display = ("user", "provider", "provider_email", "provider_user_id", "created_at")
+    list_filter = ("provider", "created_at")
+    search_fields = ("user__name", "user__email", "provider_email", "provider_user_id")
+    ordering = ("-created_at",)
+    readonly_fields = ("created_at",)
+
+
+@admin.register(OTPLog)
+class OTPLogAdmin(admin.ModelAdmin):
+    list_display = ("email", "method", "is_used", "expires_at", "created_at")
+    list_filter = ("method", "is_used", "created_at")
+    search_fields = ("email",)
+    ordering = ("-created_at",)
+    readonly_fields = ("otp_code", "created_at")
