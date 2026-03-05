@@ -195,3 +195,14 @@ def auth_callback_proxy(request, provider):
     if query:
         url += f"?{query}"
     return redirect(url)
+def student_dashboard(request):
+    return render(request, "lms/student_dashboard.html")
+
+def subscriptions_page(request):
+    return render(request, "lms/subscriptions.html")
+
+def payment_success_page(request):
+    return render(request, "lms/payment_success.html")
+
+def payment_cancel_page(request):
+    return render(request, "lms/payment_cancel.html")

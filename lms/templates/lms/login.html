@@ -1,883 +1,1100 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sign In • Learning Platform</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
-    <style>
-      :root {
-        --m3-primary: #5b8dee;
-        --m3-primary-container: #d6e4ff;
-        --m3-secondary: #b67ee0;
-        --m3-surface: #f7f8fb;
-        --m3-surface-container: #ffffff;
-        --m3-outline: #e0e4ef;
-        --m3-on-surface: #1a1c2e;
-        --m3-on-surface-variant: #5c5f75;
-        --pastel-blue: #A7C7E7;
-        --pastel-pink: #F7C8E0;
-        --pastel-green: #CDEAC0;
-        --pastel-peach: #FBE7C6;
-        --pastel-lavender: #d9cff7;
-        --radius-card: 24px;
-        --radius-input: 12px;
-        --radius-btn: 50px;
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign In • Learning Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --m3-primary: #5b8dee;
+      --m3-primary-container: #d6e4ff;
+      --m3-secondary: #b67ee0;
+      --m3-surface: #f7f8fb;
+      --m3-surface-container: #ffffff;
+      --m3-outline: #e0e4ef;
+      --m3-on-surface: #1a1c2e;
+      --m3-on-surface-variant: #5c5f75;
+      --pastel-blue: #A7C7E7;
+      --pastel-pink: #F7C8E0;
+      --pastel-green: #CDEAC0;
+      --pastel-peach: #FBE7C6;
+      --pastel-lavender: #d9cff7;
+      --radius-card: 24px;
+      --radius-input: 12px;
+      --radius-btn: 50px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #dce8ff 0%, #f7c8e0 35%, #cdeac0 70%, #fbe7c6 100%);
+      background-attachment: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated blobs */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      z-index: 0;
+      animation: blobFloat 8s ease-in-out infinite alternate;
+    }
+
+    body::before {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, #A7C7E7, #d9cff7);
+      top: -120px;
+      left: -120px;
+    }
+
+    body::after {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, #F7C8E0, #FBE7C6);
+      bottom: -100px;
+      right: -80px;
+      animation-delay: -4s;
+    }
+
+    @keyframes blobFloat {
+      0% {
+        transform: scale(1) translate(0, 0);
       }
 
-      * { box-sizing: border-box; }
+      100% {
+        transform: scale(1.15) translate(30px, 20px);
+      }
+    }
 
-      body {
-        font-family: 'Inter', sans-serif;
-        min-height: 100vh;
-        background: linear-gradient(135deg, #dce8ff 0%, #f7c8e0 35%, #cdeac0 70%, #fbe7c6 100%);
-        background-attachment: fixed;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-        position: relative;
-        overflow-x: hidden;
+    /* Card */
+    .auth-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: var(--radius-card);
+      box-shadow: 0 8px 32px rgba(91, 141, 238, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+      width: 100%;
+      max-width: 460px;
+      position: relative;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .auth-card::before {
+      content: '';
+      display: block;
+      height: 4px;
+      background: linear-gradient(90deg, var(--pastel-blue), var(--m3-secondary), var(--pastel-pink));
+      border-radius: 4px 4px 0 0;
+    }
+
+    .auth-inner {
+      padding: 36px 40px;
+    }
+
+    /* Brand */
+    .brand-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--pastel-blue), var(--m3-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      box-shadow: 0 4px 12px rgba(91, 141, 238, 0.25);
+    }
+
+    .brand-logo .material-symbols-rounded {
+      font-size: 28px;
+      color: #fff;
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--m3-on-surface);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .brand-subtitle {
+      font-size: 14px;
+      color: var(--m3-on-surface-variant);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    /* Tab Nav */
+    .m3-tabs {
+      display: flex;
+      background: #f1f3f8;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 28px;
+      gap: 2px;
+    }
+
+    .m3-tab {
+      flex: 1;
+      padding: 9px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--m3-on-surface-variant);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .m3-tab .material-symbols-rounded {
+      font-size: 18px;
+    }
+
+    .m3-tab.active {
+      background: #fff;
+      color: var(--m3-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Form inputs */
+    .m3-field {
+      margin-bottom: 16px;
+    }
+
+    .m3-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--m3-on-surface-variant);
+      margin-bottom: 6px;
+    }
+
+    .m3-input {
+      width: 100%;
+      border: 1.5px solid var(--m3-outline);
+      border-radius: var(--radius-input);
+      padding: 12px 16px;
+      font-size: 14.5px;
+      font-family: 'Inter', sans-serif;
+      background: #fafbff;
+      color: var(--m3-on-surface);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .m3-input:focus {
+      border-color: var(--m3-primary);
+      box-shadow: 0 0 0 3px rgba(91, 141, 238, 0.15);
+      background: #fff;
+    }
+
+    .m3-input.error {
+      border-color: #d93757;
+    }
+
+    .input-with-icon {
+      position: relative;
+    }
+
+    .input-with-icon .m3-input {
+      padding-left: 42px;
+    }
+
+    .input-with-icon .input-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--m3-on-surface-variant);
+      font-size: 19px;
+      pointer-events: none;
+    }
+
+    .input-with-icon .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--m3-on-surface-variant);
+      font-size: 19px;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+    }
+
+    .input-with-icon .toggle-pw:focus {
+      outline: none;
+    }
+
+    .m3-select {
+      width: 100%;
+      border: 1.5px solid var(--m3-outline);
+      border-radius: var(--radius-input);
+      padding: 12px 16px;
+      font-size: 14.5px;
+      font-family: 'Inter', sans-serif;
+      background: #fafbff;
+      color: var(--m3-on-surface);
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .m3-select:focus {
+      border-color: var(--m3-primary);
+      box-shadow: 0 0 0 3px rgba(91, 141, 238, 0.15);
+    }
+
+    /* Buttons */
+    .btn-m3-primary {
+      width: 100%;
+      padding: 13px 20px;
+      background: linear-gradient(135deg, var(--m3-primary), #7b6ee0);
+      border: none;
+      border-radius: var(--radius-btn);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      box-shadow: 0 4px 12px rgba(91, 141, 238, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-m3-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(91, 141, 238, 0.4);
+    }
+
+    .btn-m3-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-m3-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-m3-primary .material-symbols-rounded {
+      font-size: 20px;
+    }
+
+    /* Divider */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 22px 0;
+      color: var(--m3-on-surface-variant);
+      font-size: 12.5px;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--m3-outline);
+    }
+
+    /* Social buttons */
+    .social-btn {
+      width: 100%;
+      padding: 11px 16px;
+      background: #fff;
+      border: 1.5px solid var(--m3-outline);
+      border-radius: var(--radius-btn);
+      color: var(--m3-on-surface);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      text-decoration: none;
+    }
+
+    .social-btn:hover {
+      border-color: var(--m3-primary);
+      background: #f5f8ff;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .social-btn:last-child {
+      margin-bottom: 0;
+    }
+
+    .social-btn .social-icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .social-btn span.btn-label {
+      flex: 1;
+      text-align: left;
+    }
+
+    .social-btn .material-symbols-rounded {
+      font-size: 16px;
+      color: var(--m3-on-surface-variant);
+    }
+
+    /* OTP section */
+    .otp-inputs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .otp-digit {
+      width: 48px;
+      height: 56px;
+      border: 1.5px solid var(--m3-outline);
+      border-radius: 12px;
+      background: #fafbff;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--m3-on-surface);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'Inter', monospace;
+    }
+
+    .otp-digit:focus {
+      border-color: var(--m3-primary);
+      box-shadow: 0 0 0 3px rgba(91, 141, 238, 0.15);
+      background: #fff;
+    }
+
+    .otp-timer {
+      text-align: center;
+      font-size: 13px;
+      color: var(--m3-on-surface-variant);
+      margin-bottom: 16px;
+    }
+
+    .otp-timer span {
+      color: var(--m3-primary);
+      font-weight: 600;
+    }
+
+    /* Alert */
+    .m3-alert {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .m3-alert .material-symbols-rounded {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .m3-alert.error {
+      background: #fdedf1;
+      color: #c0314e;
+      border: 1px solid #f5c6d0;
+    }
+
+    .m3-alert.success {
+      background: #e8f7ee;
+      color: #1d7a46;
+      border: 1px solid #b7e4ca;
+    }
+
+    .m3-alert.info {
+      background: #e8f0ff;
+      color: #2d5cb8;
+      border: 1px solid #b3caf5;
+    }
+
+    /* OTP Step indicator */
+    .otp-step-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .otp-step {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .otp-step.active {
+      background: var(--m3-primary);
+      color: #fff;
+    }
+
+    .otp-step.done {
+      background: #CDEAC0;
+      color: #1d7a46;
+    }
+
+    .otp-step.pending {
+      background: #f1f3f8;
+      color: var(--m3-on-surface-variant);
+    }
+
+    .otp-step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--m3-outline);
+      max-width: 48px;
+    }
+
+    .otp-step-line.done {
+      background: var(--m3-primary);
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--m3-on-surface-variant);
+      font-size: 13px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      margin-bottom: 20px;
+      transition: color 0.15s;
+    }
+
+    .back-link:hover {
+      color: var(--m3-primary);
+    }
+
+    .back-link .material-symbols-rounded {
+      font-size: 16px;
+    }
+
+    /* Fade animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
       }
 
-      /* Animated blobs */
-      body::before, body::after {
-        content: '';
-        position: fixed;
-        border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.4;
-        z-index: 0;
-        animation: blobFloat 8s ease-in-out infinite alternate;
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
-      body::before {
-        width: 500px; height: 500px;
-        background: radial-gradient(circle, #A7C7E7, #d9cff7);
-        top: -120px; left: -120px;
+    }
+
+    .tab-content {
+      animation: fadeIn 0.25s ease;
+    }
+
+    /* Password strength */
+    .pw-strength {
+      height: 4px;
+      border-radius: 4px;
+      margin-top: 8px;
+      transition: all 0.3s;
+    }
+
+    /* Footer */
+    .auth-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--m3-on-surface-variant);
+    }
+
+    .auth-footer a {
+      color: var(--m3-primary);
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
       }
-      body::after {
-        width: 400px; height: 400px;
-        background: radial-gradient(circle, #F7C8E0, #FBE7C6);
-        bottom: -100px; right: -80px;
-        animation-delay: -4s;
-      }
-      @keyframes blobFloat {
-        0% { transform: scale(1) translate(0, 0); }
-        100% { transform: scale(1.15) translate(30px, 20px); }
+    }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+      .auth-inner {
+        padding: 28px 22px;
       }
 
-      /* Card */
       .auth-card {
-        background: rgba(255, 255, 255, 0.88);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255,255,255,0.7);
-        border-radius: var(--radius-card);
-        box-shadow: 0 8px 32px rgba(91,141,238,0.12), 0 2px 8px rgba(0,0,0,0.06);
-        width: 100%;
-        max-width: 460px;
-        position: relative;
-        z-index: 10;
-        overflow: hidden;
+        max-width: 100%;
       }
+    }
+  </style>
+</head>
 
-      .auth-card::before {
-        content: '';
-        display: block;
-        height: 4px;
-        background: linear-gradient(90deg, var(--pastel-blue), var(--m3-secondary), var(--pastel-pink));
-        border-radius: 4px 4px 0 0;
-      }
+<body>
+  <div class="auth-card">
+    <div class="auth-card-accent"></div>
+    <div class="auth-inner">
+      <!-- Brand -->
+      <div class="brand-logo">
+        <span class="material-symbols-rounded">school</span>
+      </div>
+      <div class="brand-title">Learning Platform</div>
+      <div class="brand-subtitle">Your gateway to knowledge</div>
 
-      .auth-inner { padding: 36px 40px; }
+      <!-- Alert area -->
+      <div id="alertArea"></div>
 
-      /* Brand */
-      .brand-logo {
-        width: 56px; height: 56px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, var(--pastel-blue), var(--m3-secondary));
-        display: flex; align-items: center; justify-content: center;
-        margin: 0 auto 16px;
-        box-shadow: 0 4px 12px rgba(91,141,238,0.25);
-      }
-      .brand-logo .material-symbols-rounded { font-size: 28px; color: #fff; }
-      .brand-title { font-size: 22px; font-weight: 700; color: var(--m3-on-surface); text-align: center; margin-bottom: 4px; }
-      .brand-subtitle { font-size: 14px; color: var(--m3-on-surface-variant); text-align: center; margin-bottom: 28px; }
+      <!-- Tab Navigation -->
+      <div class="m3-tabs" id="tabNav">
+        <button class="m3-tab active" id="tab-signin" onclick="switchTab('signin')">
+          <span class="material-symbols-rounded">login</span> Sign In
+        </button>
+        <button class="m3-tab" id="tab-signup" onclick="switchTab('signup')">
+          <span class="material-symbols-rounded">person_add</span> Sign Up
+        </button>
+        <button class="m3-tab" id="tab-otp" onclick="switchTab('otp')">
+          <span class="material-symbols-rounded">pin</span> OTP
+        </button>
+      </div>
 
-      /* Tab Nav */
-      .m3-tabs {
-        display: flex;
-        background: #f1f3f8;
-        border-radius: 12px;
-        padding: 4px;
-        margin-bottom: 28px;
-        gap: 2px;
-      }
-      .m3-tab {
-        flex: 1;
-        padding: 9px 16px;
-        border: none;
-        background: transparent;
-        border-radius: 10px;
-        font-size: 13.5px;
-        font-weight: 500;
-        color: var(--m3-on-surface-variant);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex; align-items: center; justify-content: center; gap: 6px;
-      }
-      .m3-tab .material-symbols-rounded { font-size: 18px; }
-      .m3-tab.active {
-        background: #fff;
-        color: var(--m3-primary);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      }
-
-      /* Form inputs */
-      .m3-field { margin-bottom: 16px; }
-      .m3-label {
-        display: block;
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--m3-on-surface-variant);
-        margin-bottom: 6px;
-      }
-      .m3-input {
-        width: 100%;
-        border: 1.5px solid var(--m3-outline);
-        border-radius: var(--radius-input);
-        padding: 12px 16px;
-        font-size: 14.5px;
-        font-family: 'Inter', sans-serif;
-        background: #fafbff;
-        color: var(--m3-on-surface);
-        transition: border-color 0.2s, box-shadow 0.2s;
-        outline: none;
-      }
-      .m3-input:focus {
-        border-color: var(--m3-primary);
-        box-shadow: 0 0 0 3px rgba(91,141,238,0.15);
-        background: #fff;
-      }
-      .m3-input.error { border-color: #d93757; }
-
-      .input-with-icon {
-        position: relative;
-      }
-      .input-with-icon .m3-input { padding-left: 42px; }
-      .input-with-icon .input-icon {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--m3-on-surface-variant);
-        font-size: 19px;
-        pointer-events: none;
-      }
-      .input-with-icon .toggle-pw {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-        color: var(--m3-on-surface-variant);
-        font-size: 19px;
-        background: none;
-        border: none;
-        padding: 0;
-        display: flex;
-      }
-      .input-with-icon .toggle-pw:focus { outline: none; }
-
-      .m3-select {
-        width: 100%;
-        border: 1.5px solid var(--m3-outline);
-        border-radius: var(--radius-input);
-        padding: 12px 16px;
-        font-size: 14.5px;
-        font-family: 'Inter', sans-serif;
-        background: #fafbff;
-        color: var(--m3-on-surface);
-        appearance: none;
-        cursor: pointer;
-        outline: none;
-        transition: border-color 0.2s;
-      }
-      .m3-select:focus {
-        border-color: var(--m3-primary);
-        box-shadow: 0 0 0 3px rgba(91,141,238,0.15);
-      }
-
-      /* Buttons */
-      .btn-m3-primary {
-        width: 100%;
-        padding: 13px 20px;
-        background: linear-gradient(135deg, var(--m3-primary), #7b6ee0);
-        border: none;
-        border-radius: var(--radius-btn);
-        color: #fff;
-        font-size: 15px;
-        font-weight: 600;
-        font-family: 'Inter', sans-serif;
-        cursor: pointer;
-        transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-        box-shadow: 0 4px 12px rgba(91,141,238,0.35);
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-        margin-top: 8px;
-      }
-      .btn-m3-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(91,141,238,0.4); }
-      .btn-m3-primary:active { transform: translateY(0); }
-      .btn-m3-primary:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
-      .btn-m3-primary .material-symbols-rounded { font-size: 20px; }
-
-      /* Divider */
-      .auth-divider {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 22px 0;
-        color: var(--m3-on-surface-variant);
-        font-size: 12.5px;
-      }
-      .auth-divider::before, .auth-divider::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: var(--m3-outline);
-      }
-
-      /* Social buttons */
-      .social-btn {
-        width: 100%;
-        padding: 11px 16px;
-        background: #fff;
-        border: 1.5px solid var(--m3-outline);
-        border-radius: var(--radius-btn);
-        color: var(--m3-on-surface);
-        font-size: 14px;
-        font-weight: 500;
-        font-family: 'Inter', sans-serif;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex; align-items: center; gap: 10px;
-        margin-bottom: 10px;
-        text-decoration: none;
-      }
-      .social-btn:hover { border-color: var(--m3-primary); background: #f5f8ff; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-      .social-btn:last-child { margin-bottom: 0; }
-      .social-btn .social-icon { width: 22px; height: 22px; flex-shrink: 0; }
-      .social-btn span.btn-label { flex: 1; text-align: left; }
-      .social-btn .material-symbols-rounded { font-size: 16px; color: var(--m3-on-surface-variant); }
-
-      /* OTP section */
-      .otp-inputs {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-        margin-bottom: 20px;
-      }
-      .otp-digit {
-        width: 48px; height: 56px;
-        border: 1.5px solid var(--m3-outline);
-        border-radius: 12px;
-        background: #fafbff;
-        font-size: 22px;
-        font-weight: 700;
-        text-align: center;
-        color: var(--m3-on-surface);
-        outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        font-family: 'Inter', monospace;
-      }
-      .otp-digit:focus {
-        border-color: var(--m3-primary);
-        box-shadow: 0 0 0 3px rgba(91,141,238,0.15);
-        background: #fff;
-      }
-      .otp-timer {
-        text-align: center;
-        font-size: 13px;
-        color: var(--m3-on-surface-variant);
-        margin-bottom: 16px;
-      }
-      .otp-timer span { color: var(--m3-primary); font-weight: 600; }
-
-      /* Alert */
-      .m3-alert {
-        padding: 12px 16px;
-        border-radius: 12px;
-        font-size: 13.5px;
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        animation: fadeIn 0.2s ease;
-      }
-      .m3-alert .material-symbols-rounded { font-size: 18px; flex-shrink: 0; }
-      .m3-alert.error { background: #fdedf1; color: #c0314e; border: 1px solid #f5c6d0; }
-      .m3-alert.success { background: #e8f7ee; color: #1d7a46; border: 1px solid #b7e4ca; }
-      .m3-alert.info { background: #e8f0ff; color: #2d5cb8; border: 1px solid #b3caf5; }
-
-      /* OTP Step indicator */
-      .otp-step-indicator {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin-bottom: 24px;
-      }
-      .otp-step {
-        width: 28px; height: 28px;
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 12px; font-weight: 600;
-        transition: all 0.3s;
-      }
-      .otp-step.active { background: var(--m3-primary); color: #fff; }
-      .otp-step.done { background: #CDEAC0; color: #1d7a46; }
-      .otp-step.pending { background: #f1f3f8; color: var(--m3-on-surface-variant); }
-      .otp-step-line { flex: 1; height: 2px; background: var(--m3-outline); max-width: 48px; }
-      .otp-step-line.done { background: var(--m3-primary); }
-
-      /* Back link */
-      .back-link {
-        display: inline-flex; align-items: center; gap: 4px;
-        color: var(--m3-on-surface-variant);
-        font-size: 13px;
-        cursor: pointer;
-        background: none; border: none;
-        padding: 0; margin-bottom: 20px;
-        transition: color 0.15s;
-      }
-      .back-link:hover { color: var(--m3-primary); }
-      .back-link .material-symbols-rounded { font-size: 16px; }
-
-      /* Fade animations */
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(6px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .tab-content { animation: fadeIn 0.25s ease; }
-
-      /* Password strength */
-      .pw-strength {
-        height: 4px;
-        border-radius: 4px;
-        margin-top: 8px;
-        transition: all 0.3s;
-      }
-
-      /* Footer */
-      .auth-footer {
-        text-align: center;
-        margin-top: 20px;
-        font-size: 13px;
-        color: var(--m3-on-surface-variant);
-      }
-      .auth-footer a {
-        color: var(--m3-primary);
-        text-decoration: none;
-        font-weight: 500;
-        cursor: pointer;
-      }
-      .auth-footer a:hover { text-decoration: underline; }
-
-      /* Spinner */
-      .spinner {
-        width: 18px; height: 18px;
-        border: 2.5px solid rgba(255,255,255,0.4);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-        display: inline-block;
-      }
-      @keyframes spin { to { transform: rotate(360deg); } }
-
-      /* Responsive */
-      @media (max-width: 500px) {
-        .auth-inner { padding: 28px 22px; }
-        .auth-card { max-width: 100%; }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="auth-card">
-      <div class="auth-card-accent"></div>
-      <div class="auth-inner">
-        <!-- Brand -->
-        <div class="brand-logo">
-          <span class="material-symbols-rounded">school</span>
+      <!-- ===== SIGN IN TAB ===== -->
+      <div id="pane-signin" class="tab-content">
+        <div class="m3-field">
+          <label class="m3-label">Email address</label>
+          <div class="input-with-icon">
+            <span class="material-symbols-rounded input-icon">mail</span>
+            <input type="email" class="m3-input" id="si-email" placeholder="name@example.com" autocomplete="email" />
+          </div>
         </div>
-        <div class="brand-title">Learning Platform</div>
-        <div class="brand-subtitle">Your gateway to knowledge</div>
-
-        <!-- Alert area -->
-        <div id="alertArea"></div>
-
-        <!-- Tab Navigation -->
-        <div class="m3-tabs" id="tabNav">
-          <button class="m3-tab active" id="tab-signin" onclick="switchTab('signin')">
-            <span class="material-symbols-rounded">login</span> Sign In
-          </button>
-          <button class="m3-tab" id="tab-signup" onclick="switchTab('signup')">
-            <span class="material-symbols-rounded">person_add</span> Sign Up
-          </button>
-          <button class="m3-tab" id="tab-otp" onclick="switchTab('otp')">
-            <span class="material-symbols-rounded">pin</span> OTP
-          </button>
+        <div class="m3-field">
+          <label class="m3-label">Password</label>
+          <div class="input-with-icon">
+            <span class="material-symbols-rounded input-icon">lock</span>
+            <input type="password" class="m3-input" id="si-password" placeholder="••••••••"
+              autocomplete="current-password" />
+            <button type="button" class="toggle-pw" onclick="togglePw('si-password', this)" tabindex="-1">
+              <span class="material-symbols-rounded">visibility</span>
+            </button>
+          </div>
         </div>
+        <button class="btn-m3-primary" id="si-btn" onclick="doSignIn()">
+          <span class="material-symbols-rounded">login</span>
+          <span>Sign In</span>
+        </button>
 
-        <!-- ===== SIGN IN TAB ===== -->
-        <div id="pane-signin" class="tab-content">
+        <div class="auth-divider">or continue with</div>
+
+        <!-- Social Login Buttons -->
+        <a class="social-btn" id="btn-google" href="http://localhost:8001/auth/google/"
+          onclick="return checkSocialReady(this, 'Google')">
+          <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              fill="#4285F4" />
+            <path
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              fill="#34A853" />
+            <path
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              fill="#FBBC05" />
+            <path
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              fill="#EA4335" />
+          </svg>
+          <span class="btn-label">Continue with Google</span>
+          <span class="material-symbols-rounded">arrow_forward</span>
+        </a>
+
+        <a class="social-btn" id="btn-facebook" href="http://localhost:8001/auth/facebook/"
+          onclick="return checkSocialReady(this, 'Facebook')">
+          <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+              fill="#1877F2" />
+          </svg>
+          <span class="btn-label">Continue with Facebook</span>
+          <span class="material-symbols-rounded">arrow_forward</span>
+        </a>
+
+        <a class="social-btn" id="btn-github" href="http://localhost:8001/auth/github/"
+          onclick="return checkSocialReady(this, 'GitHub')">
+          <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"
+              fill="#181717" />
+          </svg>
+          <span class="btn-label">Continue with GitHub</span>
+          <span class="material-symbols-rounded">arrow_forward</span>
+        </a>
+
+        <div class="auth-footer">
+          Don't have an account? <a onclick="switchTab('signup')">Sign Up</a>
+        </div>
+      </div>
+
+      <!-- ===== SIGN UP TAB ===== -->
+      <div id="pane-signup" class="tab-content d-none">
+        <div class="m3-field">
+          <label class="m3-label">Full Name</label>
+          <div class="input-with-icon">
+            <span class="material-symbols-rounded input-icon">person</span>
+            <input type="text" class="m3-input" id="su-name" placeholder="Your full name" autocomplete="name" />
+          </div>
+        </div>
+        <div class="m3-field">
+          <label class="m3-label">Email address</label>
+          <div class="input-with-icon">
+            <span class="material-symbols-rounded input-icon">mail</span>
+            <input type="email" class="m3-input" id="su-email" placeholder="name@example.com" autocomplete="email" />
+          </div>
+        </div>
+        <div class="m3-field">
+          <label class="m3-label">Password</label>
+          <div class="input-with-icon">
+            <span class="material-symbols-rounded input-icon">lock</span>
+            <input type="password" class="m3-input" id="su-password" placeholder="Min. 6 characters"
+              autocomplete="new-password" oninput="updateStrength(this.value)" />
+            <button type="button" class="toggle-pw" onclick="togglePw('su-password', this)" tabindex="-1">
+              <span class="material-symbols-rounded">visibility</span>
+            </button>
+          </div>
+          <div id="pw-strength-bar" class="pw-strength" style="background:#e0e4ef;"></div>
+        </div>
+        <div class="m3-field">
+          <label class="m3-label">I am a</label>
+          <div style="position:relative">
+            <select class="m3-select" id="su-role">
+              <option value="student">🎓 Student</option>
+              <option value="instructor">🏫 Instructor</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-m3-primary" id="su-btn" onclick="doSignUp()">
+          <span class="material-symbols-rounded">person_add</span>
+          <span>Create Account</span>
+        </button>
+        <div class="auth-footer mt-3">
+          Already have an account? <a onclick="switchTab('signin')">Sign In</a>
+        </div>
+      </div>
+
+      <!-- ===== OTP TAB ===== -->
+      <div id="pane-otp" class="tab-content d-none">
+
+        <!-- Step 1: Enter Email -->
+        <div id="otp-step1">
+          <div class="otp-step-indicator">
+            <div class="otp-step active" id="otp-step-dot1">1</div>
+            <div class="otp-step-line" id="otp-line1"></div>
+            <div class="otp-step pending" id="otp-step-dot2">2</div>
+          </div>
+          <p class="text-center mb-3" style="font-size:14px;color:var(--m3-on-surface-variant);">
+            Enter your email to receive a one-time code.
+          </p>
           <div class="m3-field">
             <label class="m3-label">Email address</label>
             <div class="input-with-icon">
               <span class="material-symbols-rounded input-icon">mail</span>
-              <input type="email" class="m3-input" id="si-email" placeholder="name@example.com" autocomplete="email"/>
+              <input type="email" class="m3-input" id="otp-email" placeholder="name@example.com" />
             </div>
           </div>
           <div class="m3-field">
-            <label class="m3-label">Password</label>
-            <div class="input-with-icon">
-              <span class="material-symbols-rounded input-icon">lock</span>
-              <input type="password" class="m3-input" id="si-password" placeholder="••••••••" autocomplete="current-password"/>
-              <button type="button" class="toggle-pw" onclick="togglePw('si-password', this)" tabindex="-1">
-                <span class="material-symbols-rounded">visibility</span>
-              </button>
-            </div>
-          </div>
-          <button class="btn-m3-primary" id="si-btn" onclick="doSignIn()">
-            <span class="material-symbols-rounded">login</span>
-            <span>Sign In</span>
-          </button>
-
-          <div class="auth-divider">or continue with</div>
-
-          <!-- Social Login Buttons -->
-          <a class="social-btn" id="btn-google" href="http://localhost:8001/auth/google/" onclick="return checkSocialReady(this, 'Google')">
-            <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            <span class="btn-label">Continue with Google</span>
-            <span class="material-symbols-rounded">arrow_forward</span>
-          </a>
-
-          <a class="social-btn" id="btn-facebook" href="http://localhost:8001/auth/facebook/" onclick="return checkSocialReady(this, 'Facebook')">
-            <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
-            </svg>
-            <span class="btn-label">Continue with Facebook</span>
-            <span class="material-symbols-rounded">arrow_forward</span>
-          </a>
-
-          <a class="social-btn" id="btn-github" href="http://localhost:8001/auth/github/" onclick="return checkSocialReady(this, 'GitHub')">
-            <svg class="social-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" fill="#181717"/>
-            </svg>
-            <span class="btn-label">Continue with GitHub</span>
-            <span class="material-symbols-rounded">arrow_forward</span>
-          </a>
-
-          <div class="auth-footer">
-            Don't have an account? <a onclick="switchTab('signup')">Sign Up</a>
-          </div>
-        </div>
-
-        <!-- ===== SIGN UP TAB ===== -->
-        <div id="pane-signup" class="tab-content d-none">
-          <div class="m3-field">
-            <label class="m3-label">Full Name</label>
+            <label class="m3-label">Full Name <span style="color:var(--m3-on-surface-variant);font-weight:400">(for new
+                users)</span></label>
             <div class="input-with-icon">
               <span class="material-symbols-rounded input-icon">person</span>
-              <input type="text" class="m3-input" id="su-name" placeholder="Your full name" autocomplete="name"/>
+              <input type="text" class="m3-input" id="otp-name" placeholder="Optional — auto-filled from email" />
             </div>
           </div>
-          <div class="m3-field">
-            <label class="m3-label">Email address</label>
-            <div class="input-with-icon">
-              <span class="material-symbols-rounded input-icon">mail</span>
-              <input type="email" class="m3-input" id="su-email" placeholder="name@example.com" autocomplete="email"/>
+          <button class="btn-m3-primary" id="otp-send-btn" onclick="doSendOTP()">
+            <span class="material-symbols-rounded">send</span>
+            <span>Send OTP</span>
+          </button>
+        </div>
+
+        <!-- Step 2: Enter OTP -->
+        <div id="otp-step2" class="d-none">
+          <div class="otp-step-indicator">
+            <div class="otp-step done" id="otp-step-dot1b">
+              <span class="material-symbols-rounded" style="font-size:14px;">check</span>
             </div>
+            <div class="otp-step-line done"></div>
+            <div class="otp-step active" id="otp-step-dot2b">2</div>
           </div>
-          <div class="m3-field">
-            <label class="m3-label">Password</label>
-            <div class="input-with-icon">
-              <span class="material-symbols-rounded input-icon">lock</span>
-              <input type="password" class="m3-input" id="su-password" placeholder="Min. 6 characters" autocomplete="new-password" oninput="updateStrength(this.value)"/>
-              <button type="button" class="toggle-pw" onclick="togglePw('su-password', this)" tabindex="-1">
-                <span class="material-symbols-rounded">visibility</span>
-              </button>
-            </div>
-            <div id="pw-strength-bar" class="pw-strength" style="background:#e0e4ef;"></div>
+          <button class="back-link" onclick="showOTPStep1()">
+            <span class="material-symbols-rounded">arrow_back</span> Use different email
+          </button>
+          <p class="mb-1" style="font-size:14px;color:var(--m3-on-surface-variant);">
+            Enter the 6-digit code sent to <strong id="otp-email-display" style="color:var(--m3-on-surface)"></strong>
+          </p>
+          <div class="otp-timer mb-3" id="otp-timer-display">Code expires in <span id="otp-countdown">10:00</span></div>
+          <div class="otp-inputs" id="otp-digits-container">
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d0" />
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d1" />
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d2" />
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d3" />
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d4" />
+            <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d5" />
           </div>
-          <div class="m3-field">
-            <label class="m3-label">I am a</label>
-            <div style="position:relative">
-              <select class="m3-select" id="su-role">
-                <option value="student">🎓 Student</option>
-                <option value="instructor">🏫 Instructor</option>
-              </select>
-            </div>
-          </div>
-          <button class="btn-m3-primary" id="su-btn" onclick="doSignUp()">
-            <span class="material-symbols-rounded">person_add</span>
-            <span>Create Account</span>
+          <button class="btn-m3-primary" id="otp-verify-btn" onclick="doVerifyOTP()">
+            <span class="material-symbols-rounded">verified</span>
+            <span>Verify & Sign In</span>
           </button>
           <div class="auth-footer mt-3">
-            Already have an account? <a onclick="switchTab('signin')">Sign In</a>
+            Didn't receive it? <a id="resend-link" onclick="doResendOTP()">Resend code</a>
           </div>
         </div>
+      </div>
 
-        <!-- ===== OTP TAB ===== -->
-        <div id="pane-otp" class="tab-content d-none">
+    </div><!-- /auth-inner -->
+  </div><!-- /auth-card -->
 
-          <!-- Step 1: Enter Email -->
-          <div id="otp-step1">
-            <div class="otp-step-indicator">
-              <div class="otp-step active" id="otp-step-dot1">1</div>
-              <div class="otp-step-line" id="otp-line1"></div>
-              <div class="otp-step pending" id="otp-step-dot2">2</div>
-            </div>
-            <p class="text-center mb-3" style="font-size:14px;color:var(--m3-on-surface-variant);">
-              Enter your email to receive a one-time code.
-            </p>
-            <div class="m3-field">
-              <label class="m3-label">Email address</label>
-              <div class="input-with-icon">
-                <span class="material-symbols-rounded input-icon">mail</span>
-                <input type="email" class="m3-input" id="otp-email" placeholder="name@example.com"/>
-              </div>
-            </div>
-            <div class="m3-field">
-              <label class="m3-label">Full Name <span style="color:var(--m3-on-surface-variant);font-weight:400">(for new users)</span></label>
-              <div class="input-with-icon">
-                <span class="material-symbols-rounded input-icon">person</span>
-                <input type="text" class="m3-input" id="otp-name" placeholder="Optional — auto-filled from email"/>
-              </div>
-            </div>
-            <button class="btn-m3-primary" id="otp-send-btn" onclick="doSendOTP()">
-              <span class="material-symbols-rounded">send</span>
-              <span>Send OTP</span>
-            </button>
-          </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const API = 'http://localhost:8001';
+    let otpEmail = '';
+    let otpCountdownInterval = null;
 
-          <!-- Step 2: Enter OTP -->
-          <div id="otp-step2" class="d-none">
-            <div class="otp-step-indicator">
-              <div class="otp-step done" id="otp-step-dot1b">
-                <span class="material-symbols-rounded" style="font-size:14px;">check</span>
-              </div>
-              <div class="otp-step-line done"></div>
-              <div class="otp-step active" id="otp-step-dot2b">2</div>
-            </div>
-            <button class="back-link" onclick="showOTPStep1()">
-              <span class="material-symbols-rounded">arrow_back</span> Use different email
-            </button>
-            <p class="mb-1" style="font-size:14px;color:var(--m3-on-surface-variant);">
-              Enter the 6-digit code sent to <strong id="otp-email-display" style="color:var(--m3-on-surface)"></strong>
-            </p>
-            <div class="otp-timer mb-3" id="otp-timer-display">Code expires in <span id="otp-countdown">10:00</span></div>
-            <div class="otp-inputs" id="otp-digits-container">
-              <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d0"/>
-              <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d1"/>
-              <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d2"/>
-              <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d3"/>
-              <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d4"/>
-              <input class="otp-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d5"/>
-            </div>
-            <button class="btn-m3-primary" id="otp-verify-btn" onclick="doVerifyOTP()">
-              <span class="material-symbols-rounded">verified</span>
-              <span>Verify & Sign In</span>
-            </button>
-            <div class="auth-footer mt-3">
-              Didn't receive it? <a id="resend-link" onclick="doResendOTP()">Resend code</a>
-            </div>
-          </div>
-        </div>
+    // ───────── Tab switching ─────────
+    function switchTab(name) {
+      ['signin', 'signup', 'otp'].forEach(t => {
+        document.getElementById('tab-' + t)?.classList.toggle('active', t === name);
+        document.getElementById('pane-' + t)?.classList.toggle('d-none', t !== name);
+      });
+      clearAlert();
+    }
 
-      </div><!-- /auth-inner -->
-    </div><!-- /auth-card -->
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      const API = 'http://localhost:8001';
-      let otpEmail = '';
-      let otpCountdownInterval = null;
-
-      // ───────── Tab switching ─────────
-      function switchTab(name) {
-        ['signin','signup','otp'].forEach(t => {
-          document.getElementById('tab-' + t)?.classList.toggle('active', t === name);
-          document.getElementById('pane-' + t)?.classList.toggle('d-none', t !== name);
-        });
-        clearAlert();
-      }
-
-      // ───────── Alerts ─────────
-      function showAlert(type, msg) {
-        const icons = { error: 'error', success: 'check_circle', info: 'info' };
-        document.getElementById('alertArea').innerHTML = `
+    // ───────── Alerts ─────────
+    function showAlert(type, msg) {
+      const icons = { error: 'error', success: 'check_circle', info: 'info' };
+      document.getElementById('alertArea').innerHTML = `
           <div class="m3-alert ${type}">
             <span class="material-symbols-rounded">${icons[type] || 'info'}</span>
             <span>${msg}</span>
           </div>`;
-      }
-      function clearAlert() { document.getElementById('alertArea').innerHTML = ''; }
+    }
+    function clearAlert() { document.getElementById('alertArea').innerHTML = ''; }
 
-      // ───────── Toggle password visibility ─────────
-      function togglePw(inputId, btn) {
-        const inp = document.getElementById(inputId);
-        const icon = btn.querySelector('.material-symbols-rounded');
-        if (inp.type === 'password') { inp.type = 'text'; icon.textContent = 'visibility_off'; }
-        else { inp.type = 'password'; icon.textContent = 'visibility'; }
-      }
+    // ───────── Toggle password visibility ─────────
+    function togglePw(inputId, btn) {
+      const inp = document.getElementById(inputId);
+      const icon = btn.querySelector('.material-symbols-rounded');
+      if (inp.type === 'password') { inp.type = 'text'; icon.textContent = 'visibility_off'; }
+      else { inp.type = 'password'; icon.textContent = 'visibility'; }
+    }
 
-      // ───────── Password strength ─────────
-      function updateStrength(val) {
-        const bar = document.getElementById('pw-strength-bar');
-        if (!val) { bar.style.background = '#e0e4ef'; bar.style.width = '0%'; return; }
-        let score = 0;
-        if (val.length >= 6) score++;
-        if (val.length >= 10) score++;
-        if (/[A-Z]/.test(val)) score++;
-        if (/[0-9]/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
-        const colors = ['#f5a623','#f5a623','#f7c948','#7bc67e','#4caf50'];
-        const widths = ['20%','40%','60%','80%','100%'];
-        bar.style.background = colors[score - 1] || '#e0e4ef';
-        bar.style.width = widths[score - 1] || '0%';
-      }
+    // ───────── Password strength ─────────
+    function updateStrength(val) {
+      const bar = document.getElementById('pw-strength-bar');
+      if (!val) { bar.style.background = '#e0e4ef'; bar.style.width = '0%'; return; }
+      let score = 0;
+      if (val.length >= 6) score++;
+      if (val.length >= 10) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const colors = ['#f5a623', '#f5a623', '#f7c948', '#7bc67e', '#4caf50'];
+      const widths = ['20%', '40%', '60%', '80%', '100%'];
+      bar.style.background = colors[score - 1] || '#e0e4ef';
+      bar.style.width = widths[score - 1] || '0%';
+    }
 
-      // ───────── Set loading state ─────────
-      function setLoading(btnId, loading, text) {
-        const btn = document.getElementById(btnId);
-        if (!btn) return;
-        btn.disabled = loading;
-        btn.innerHTML = loading
-          ? `<span class="spinner"></span><span>${text || 'Please wait...'}</span>`
-          : btn.getAttribute('data-original') || btn.innerHTML;
-      }
-      function saveOriginal(btnId) {
-        const btn = document.getElementById(btnId);
-        if (btn) btn.setAttribute('data-original', btn.innerHTML);
-      }
+    // ───────── Set loading state ─────────
+    function setLoading(btnId, loading, text) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.disabled = loading;
+      btn.innerHTML = loading
+        ? `<span class="spinner"></span><span>${text || 'Please wait...'}</span>`
+        : btn.getAttribute('data-original') || btn.innerHTML;
+    }
+    function saveOriginal(btnId) {
+      const btn = document.getElementById(btnId);
+      if (btn) btn.setAttribute('data-original', btn.innerHTML);
+    }
 
-      // ───────── On auth success ─────────
-      function onAuthSuccess(token, userId, username) {
-        localStorage.setItem('token', token);
-        if (userId) localStorage.setItem('user_id', userId);
-        if (username) localStorage.setItem('email', username);
-        showAlert('success', `Welcome, ${username || 'User'}! Redirecting...`);
-        setTimeout(() => { window.location.href = '/admin/chat/'; }, 1200);
+    // ───────── On auth success ─────────
+    function onAuthSuccess(token, userId, username) {
+      localStorage.setItem('token', token);
+      if (userId) localStorage.setItem('user_id', userId);
+      if (username) localStorage.setItem('email', username);
+      showAlert('success', `Welcome, ${username || 'User'}! Redirecting...`);
+      setTimeout(() => { window.location.href = '/student/dashboard/'; }, 1200);
+    }
+
+    // ───────── Handle token from OAuth redirect ─────────
+    (function checkOAuthRedirect() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      const userId = params.get('user_id');
+      const username = params.get('username');
+      if (token) {
+        onAuthSuccess(token, userId, username);
+      } else if (localStorage.getItem('token')) {
+        // Already logged in
+        window.location.href = '/student/dashboard/';
       }
+    })();
 
-      // ───────── Handle token from OAuth redirect ─────────
-      (function checkOAuthRedirect() {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get('token');
-        const userId = params.get('user_id');
-        const username = params.get('username');
-        if (token) {
-          onAuthSuccess(token, userId, username);
-        } else if (localStorage.getItem('token')) {
-          // Already logged in
-          window.location.href = '/admin/chat/';
-        }
-      })();
-
-      // ───────── Sign In ─────────
-      saveOriginal('si-btn');
-      async function doSignIn() {
-        clearAlert();
-        const email = document.getElementById('si-email').value.trim();
-        const password = document.getElementById('si-password').value;
-        if (!email || !password) { showAlert('error', 'Please fill in all fields.'); return; }
-        setLoading('si-btn', true, 'Signing in...');
-        try {
-          const fd = new FormData();
-          fd.append('username', email);
-          fd.append('password', password);
-          const r = await fetch(API + '/token/', { method: 'POST', body: fd });
-          const j = await r.json();
-          if (!r.ok) throw new Error(j.detail || 'Invalid credentials');
-          onAuthSuccess(j.access_token, j.user_id, j.username || email);
-        } catch(e) {
-          showAlert('error', e.message || 'Sign in failed. Please try again.');
-          document.getElementById('si-btn').innerHTML = document.getElementById('si-btn').getAttribute('data-original');
-          document.getElementById('si-btn').disabled = false;
-        }
+    // ───────── Sign In ─────────
+    saveOriginal('si-btn');
+    async function doSignIn() {
+      clearAlert();
+      const email = document.getElementById('si-email').value.trim();
+      const password = document.getElementById('si-password').value;
+      if (!email || !password) { showAlert('error', 'Please fill in all fields.'); return; }
+      setLoading('si-btn', true, 'Signing in...');
+      try {
+        const fd = new FormData();
+        fd.append('username', email);
+        fd.append('password', password);
+        const r = await fetch(API + '/token/', { method: 'POST', body: fd });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || 'Invalid credentials');
+        onAuthSuccess(j.access_token, j.user_id, j.username || email);
+      } catch (e) {
+        showAlert('error', e.message || 'Sign in failed. Please try again.');
+        document.getElementById('si-btn').innerHTML = document.getElementById('si-btn').getAttribute('data-original');
+        document.getElementById('si-btn').disabled = false;
       }
+    }
 
-      // ───────── Sign Up ─────────
-      saveOriginal('su-btn');
-      async function doSignUp() {
-        clearAlert();
-        const name = document.getElementById('su-name').value.trim();
-        const email = document.getElementById('su-email').value.trim();
-        const password = document.getElementById('su-password').value;
-        const role = document.getElementById('su-role').value;
-        if (!name || !email || !password) { showAlert('error', 'Please fill in all fields.'); return; }
-        if (password.length < 6) { showAlert('error', 'Password must be at least 6 characters.'); return; }
-        setLoading('su-btn', true, 'Creating account...');
-        try {
-          const r = await fetch(API + '/register/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password, role }),
-          });
-          const j = await r.json();
-          if (!r.ok) throw new Error(j.detail || 'Registration failed');
-          onAuthSuccess(j.access_token, j.user_id, j.username || name);
-        } catch(e) {
-          showAlert('error', e.message || 'Registration failed. Please try again.');
-          document.getElementById('su-btn').innerHTML = document.getElementById('su-btn').getAttribute('data-original');
-          document.getElementById('su-btn').disabled = false;
-        }
+    // ───────── Sign Up ─────────
+    saveOriginal('su-btn');
+    async function doSignUp() {
+      clearAlert();
+      const name = document.getElementById('su-name').value.trim();
+      const email = document.getElementById('su-email').value.trim();
+      const password = document.getElementById('su-password').value;
+      const role = document.getElementById('su-role').value;
+      if (!name || !email || !password) { showAlert('error', 'Please fill in all fields.'); return; }
+      if (password.length < 6) { showAlert('error', 'Password must be at least 6 characters.'); return; }
+      setLoading('su-btn', true, 'Creating account...');
+      try {
+        const r = await fetch(API + '/register/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, role }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || 'Registration failed');
+        onAuthSuccess(j.access_token, j.user_id, j.username || name);
+      } catch (e) {
+        showAlert('error', e.message || 'Registration failed. Please try again.');
+        document.getElementById('su-btn').innerHTML = document.getElementById('su-btn').getAttribute('data-original');
+        document.getElementById('su-btn').disabled = false;
       }
+    }
 
-      // ───────── OTP: Send ─────────
-      saveOriginal('otp-send-btn');
-      async function doSendOTP() {
-        clearAlert();
-        const email = document.getElementById('otp-email').value.trim();
-        const name = document.getElementById('otp-name').value.trim();
-        if (!email) { showAlert('error', 'Please enter your email address.'); return; }
-        setLoading('otp-send-btn', true, 'Sending OTP...');
-        try {
-          const r = await fetch(API + '/auth/otp/send/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, name }),
-          });
-          const j = await r.json();
-          if (!r.ok) throw new Error(j.detail || 'Failed to send OTP');
-          otpEmail = email;
-          document.getElementById('otp-email-display').textContent = email;
-          showOTPStep2();
-          startOTPCountdown(10 * 60);
-        } catch(e) {
-          showAlert('error', e.message || 'Could not send OTP. Check SMTP settings.');
-          document.getElementById('otp-send-btn').innerHTML = document.getElementById('otp-send-btn').getAttribute('data-original');
-          document.getElementById('otp-send-btn').disabled = false;
-        }
-      }
-
-      async function doResendOTP() {
-        clearAlert();
-        clearInterval(otpCountdownInterval);
-        // Reset digits
-        for (let i = 0; i < 6; i++) document.getElementById('d' + i).value = '';
-        document.getElementById('otp-email').value = otpEmail;
-        await doSendOTP();
-      }
-
-      // ───────── OTP: Verify ─────────
-      saveOriginal('otp-verify-btn');
-      async function doVerifyOTP() {
-        clearAlert();
-        const code = Array.from({length: 6}, (_, i) => document.getElementById('d' + i).value).join('');
-        if (code.length !== 6) { showAlert('error', 'Please enter the full 6-digit code.'); return; }
-        setLoading('otp-verify-btn', true, 'Verifying...');
-        try {
-          const r = await fetch(API + '/auth/otp/verify/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: otpEmail, otp_code: code }),
-          });
-          const j = await r.json();
-          if (!r.ok) throw new Error(j.detail || 'Invalid OTP');
-          clearInterval(otpCountdownInterval);
-          onAuthSuccess(j.access_token, j.user_id, j.username || otpEmail);
-        } catch(e) {
-          showAlert('error', e.message || 'OTP verification failed.');
-          document.getElementById('otp-verify-btn').innerHTML = document.getElementById('otp-verify-btn').getAttribute('data-original');
-          document.getElementById('otp-verify-btn').disabled = false;
-        }
-      }
-
-      // ───────── OTP Step UI ─────────
-      function showOTPStep2() {
-        document.getElementById('otp-step1').classList.add('d-none');
-        document.getElementById('otp-step2').classList.remove('d-none');
+    // ───────── OTP: Send ─────────
+    saveOriginal('otp-send-btn');
+    async function doSendOTP() {
+      clearAlert();
+      const email = document.getElementById('otp-email').value.trim();
+      const name = document.getElementById('otp-name').value.trim();
+      if (!email) { showAlert('error', 'Please enter your email address.'); return; }
+      setLoading('otp-send-btn', true, 'Sending OTP...');
+      try {
+        const r = await fetch(API + '/auth/otp/send/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || 'Failed to send OTP');
+        otpEmail = email;
+        document.getElementById('otp-email-display').textContent = email;
+        showOTPStep2();
+        startOTPCountdown(10 * 60);
+      } catch (e) {
+        showAlert('error', e.message || 'Could not send OTP. Check SMTP settings.');
         document.getElementById('otp-send-btn').innerHTML = document.getElementById('otp-send-btn').getAttribute('data-original');
         document.getElementById('otp-send-btn').disabled = false;
-        setTimeout(() => document.getElementById('d0').focus(), 100);
       }
-      function showOTPStep1() {
-        document.getElementById('otp-step2').classList.add('d-none');
-        document.getElementById('otp-step1').classList.remove('d-none');
-        clearInterval(otpCountdownInterval);
-        clearAlert();
-      }
+    }
 
-      // ───────── OTP Countdown ─────────
-      function startOTPCountdown(seconds) {
-        const el = document.getElementById('otp-countdown');
+    async function doResendOTP() {
+      clearAlert();
+      clearInterval(otpCountdownInterval);
+      // Reset digits
+      for (let i = 0; i < 6; i++) document.getElementById('d' + i).value = '';
+      document.getElementById('otp-email').value = otpEmail;
+      await doSendOTP();
+    }
+
+    // ───────── OTP: Verify ─────────
+    saveOriginal('otp-verify-btn');
+    async function doVerifyOTP() {
+      clearAlert();
+      const code = Array.from({ length: 6 }, (_, i) => document.getElementById('d' + i).value).join('');
+      if (code.length !== 6) { showAlert('error', 'Please enter the full 6-digit code.'); return; }
+      setLoading('otp-verify-btn', true, 'Verifying...');
+      try {
+        const r = await fetch(API + '/auth/otp/verify/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: otpEmail, otp_code: code }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || 'Invalid OTP');
         clearInterval(otpCountdownInterval);
-        let remaining = seconds;
-        function tick() {
-          const m = Math.floor(remaining / 60).toString().padStart(2, '0');
-          const s = (remaining % 60).toString().padStart(2, '0');
-          if (el) el.textContent = `${m}:${s}`;
-          if (remaining <= 0) {
-            clearInterval(otpCountdownInterval);
-            showAlert('error', 'OTP has expired. Please request a new one.');
-          }
-          remaining--;
+        onAuthSuccess(j.access_token, j.user_id, j.username || otpEmail);
+      } catch (e) {
+        showAlert('error', e.message || 'OTP verification failed.');
+        document.getElementById('otp-verify-btn').innerHTML = document.getElementById('otp-verify-btn').getAttribute('data-original');
+        document.getElementById('otp-verify-btn').disabled = false;
+      }
+    }
+
+    // ───────── OTP Step UI ─────────
+    function showOTPStep2() {
+      document.getElementById('otp-step1').classList.add('d-none');
+      document.getElementById('otp-step2').classList.remove('d-none');
+      document.getElementById('otp-send-btn').innerHTML = document.getElementById('otp-send-btn').getAttribute('data-original');
+      document.getElementById('otp-send-btn').disabled = false;
+      setTimeout(() => document.getElementById('d0').focus(), 100);
+    }
+    function showOTPStep1() {
+      document.getElementById('otp-step2').classList.add('d-none');
+      document.getElementById('otp-step1').classList.remove('d-none');
+      clearInterval(otpCountdownInterval);
+      clearAlert();
+    }
+
+    // ───────── OTP Countdown ─────────
+    function startOTPCountdown(seconds) {
+      const el = document.getElementById('otp-countdown');
+      clearInterval(otpCountdownInterval);
+      let remaining = seconds;
+      function tick() {
+        const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+        const s = (remaining % 60).toString().padStart(2, '0');
+        if (el) el.textContent = `${m}:${s}`;
+        if (remaining <= 0) {
+          clearInterval(otpCountdownInterval);
+          showAlert('error', 'OTP has expired. Please request a new one.');
         }
-        tick();
-        otpCountdownInterval = setInterval(tick, 1000);
+        remaining--;
       }
+      tick();
+      otpCountdownInterval = setInterval(tick, 1000);
+    }
 
-      // ───────── OTP digit navigation ─────────
-      document.addEventListener('DOMContentLoaded', () => {
-        const digits = Array.from({length: 6}, (_, i) => document.getElementById('d' + i));
-        digits.forEach((inp, idx) => {
-          inp.addEventListener('input', (e) => {
-            const val = e.target.value.replace(/\D/g, '');
-            inp.value = val.slice(-1);
-            if (val && idx < 5) digits[idx + 1].focus();
-          });
-          inp.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !inp.value && idx > 0) digits[idx - 1].focus();
-            if (e.key === 'ArrowLeft' && idx > 0) digits[idx - 1].focus();
-            if (e.key === 'ArrowRight' && idx < 5) digits[idx + 1].focus();
-          });
-          inp.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
-            pasted.split('').forEach((c, i) => { if (digits[i]) digits[i].value = c; });
-            if (pasted.length > 0) digits[Math.min(pasted.length - 1, 5)].focus();
-          });
+    // ───────── OTP digit navigation ─────────
+    document.addEventListener('DOMContentLoaded', () => {
+      const digits = Array.from({ length: 6 }, (_, i) => document.getElementById('d' + i));
+      digits.forEach((inp, idx) => {
+        inp.addEventListener('input', (e) => {
+          const val = e.target.value.replace(/\D/g, '');
+          inp.value = val.slice(-1);
+          if (val && idx < 5) digits[idx + 1].focus();
+        });
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !inp.value && idx > 0) digits[idx - 1].focus();
+          if (e.key === 'ArrowLeft' && idx > 0) digits[idx - 1].focus();
+          if (e.key === 'ArrowRight' && idx < 5) digits[idx + 1].focus();
+        });
+        inp.addEventListener('paste', (e) => {
+          e.preventDefault();
+          const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+          pasted.split('').forEach((c, i) => { if (digits[i]) digits[i].value = c; });
+          if (pasted.length > 0) digits[Math.min(pasted.length - 1, 5)].focus();
         });
       });
+    });
 
-      // ───────── Social login readiness check ─────────
-      function checkSocialReady(el, provider) {
-        // Show info if user just wants to navigate — redirect proceeds naturally
-        // We just update the URL to point to FastAPI
-        return true; // Allow normal link navigation
-      }
+    // ───────── Social login readiness check ─────────
+    function checkSocialReady(el, provider) {
+      // Show info if user just wants to navigate — redirect proceeds naturally
+      // We just update the URL to point to FastAPI
+      return true; // Allow normal link navigation
+    }
 
-      // ───────── Enter key support ─────────
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          const activePane = document.querySelector('[id^="pane-"]:not(.d-none)');
-          if (!activePane) return;
-          const paneId = activePane.id;
-          if (paneId === 'pane-signin') doSignIn();
-          else if (paneId === 'pane-signup') doSignUp();
-          else if (paneId === 'pane-otp') {
-            const s2 = document.getElementById('otp-step2');
-            if (!s2.classList.contains('d-none')) doVerifyOTP();
-            else doSendOTP();
-          }
+    // ───────── Enter key support ─────────
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const activePane = document.querySelector('[id^="pane-"]:not(.d-none)');
+        if (!activePane) return;
+        const paneId = activePane.id;
+        if (paneId === 'pane-signin') doSignIn();
+        else if (paneId === 'pane-signup') doSignUp();
+        else if (paneId === 'pane-otp') {
+          const s2 = document.getElementById('otp-step2');
+          if (!s2.classList.contains('d-none')) doVerifyOTP();
+          else doSendOTP();
         }
-      });
-    </script>
-  </body>
+      }
+    });
+  </script>
+</body>
+
 </html>

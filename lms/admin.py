@@ -61,9 +61,9 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "plan", "amount", "payment_date")
-    list_filter = ("payment_date",)
-    search_fields = ("user__name", "plan__name")
+    list_display = ("id", "stripe_transaction_id", "user", "plan", "course", "amount", "status", "payment_date")
+    list_filter = ("status", "payment_date")
+    search_fields = ("user__name", "plan__name", "course__title", "stripe_transaction_id")
 
 
 @admin.register(Notification)

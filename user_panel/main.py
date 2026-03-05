@@ -27,6 +27,7 @@ from .schemas import (
     PlanOut,
     SubscribeRequest,
     PaymentOut,
+    SubscriptionOut,
     NotificationOut,
     MarkReadRequest,
     ActivityLogRequest,
@@ -43,6 +44,7 @@ from user_panel.auth_google import router as google_router
 from user_panel.auth_facebook import router as facebook_router
 from user_panel.auth_github import router as github_router
 from user_panel.auth_otp import router as otp_router
+from user_panel.payment import router as payment_router
 
 app = FastAPI(title="LMS User Panel API", version="1.0.0")
 
@@ -62,6 +64,7 @@ app.include_router(google_router)
 app.include_router(facebook_router)
 app.include_router(github_router)
 app.include_router(otp_router)
+app.include_router(payment_router)
 
 @app.post("/token/", response_model=TokenResponse, summary="OAuth2 Password flow token endpoint")
 def token(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -279,6 +282,24 @@ def subscribe(req: SubscribeRequest, user: LMSUser = Depends(get_current_user)):
     except Exception:
         pass
     return {"status": "ok", "plan": plan.name}
+
+
+@app.get("/subscriptions/me/", response_model=SubscriptionOut | dict)
+def my_subscription(user: LMSUser = Depends(get_current_user)):
+    from django.utils import timezone as djtz
+    sub = Subscription.objects.select_related("plan").filter(
+        user=user, status="active", end_date__gte=djtz.now()
+    ).order_by("-end_date").first()
+    
+    if sub:
+        return SubscriptionOut(
+            plan_id=sub.plan.id,
+            plan_name=sub.plan.name,
+            start_date=sub.start_date.isoformat(),
+            end_date=sub.end_date.isoformat(),
+            status=sub.status
+        )
+    return {}
 
 
 @app.get("/payments/", response_model=List[PaymentOut])

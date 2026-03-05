@@ -102,12 +102,16 @@ class Subscription(models.Model):
 
 class Payment(models.Model):
     user = models.ForeignKey(LMSUser, on_delete=models.CASCADE, related_name="payments")
-    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="payments")
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, null=True, blank=True, related_name="payments")
+    course = models.ForeignKey(Course, on_delete=models.PROTECT, null=True, blank=True, related_name="payments")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    stripe_transaction_id = models.CharField(max_length=255, blank=True, null=True)
+    status = models.CharField(max_length=20, default='completed')
     payment_date = models.DateTimeField(default=timezone.now)
 
     def __str__(self) -> str:
-        return f"{self.user.name} - {self.plan.name} - {self.amount}"
+        item = self.plan.name if self.plan else (self.course.title if self.course else "Item")
+        return f"{self.user.name} - {item} - {self.amount}"
 
 
 class Notification(models.Model):

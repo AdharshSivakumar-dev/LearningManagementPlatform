@@ -1,131 +1,160 @@
-# Learning Management Platform
+# 🎓 Learning Management Platform (LMS)
 
-A comprehensive LMS platform featuring a Django-based Admin Panel and a FastAPI-powered User Panel. This project includes course management, subscriptions, real-time chat, advanced academic modules, and a complete authentication system with social logins and OTP.
+A production-ready, highly interactive Learning Management System (LMS) built with **Django** (Admin & Frontend Portal) and **FastAPI** (High-performance Async User APIs). 
 
-## Authentication Features
+This project provides a complete ecosystem for online education, featuring real-time course management, multi-provider social authentication, Stripe payment integrations, and WebSockets-powered live chat functionalities.
 
-- **Email/Password Login & Registration** — JWT-based via FastAPI
-- **Social Login** — Google, Facebook, GitHub OAuth2 redirect flows
-- **OTP Login/Signup** — 6-digit code delivered via email, expires in 10 minutes
-- **Unified Login/Signup Page** — accessible at `http://localhost:8000/login/`
-- **JWT Tokens** — issued on all successful auth flows
+---
 
-## Recent Updates
+##  Key Features
 
-- **Auth System:** Unified login/signup page with social OAuth2 and OTP authentication
-- **Social Accounts Model:** Django model tracking linked provider accounts per user
-- **OTP Log Model:** Django model tracking OTP sends, usage, and expiry per email
-- **Attendance Tracking:** Fully integrated system to mark student attendance per course
-- **Assignment Management:** Robust module for instructors to create and grade assignments
-- **Course Analytics:** Server-side aggregation endpoints for course performance
-- **Automated Notifications:** Event-driven in-app and email alerts
+### Advanced Authentication (FastAPI & Django)
+- **Unified Login Portal**: login and sign-up interface.
+- **Social SSO**: One-click login using **Google, Facebook, and GitHub**.
+- **OTP Verification**: Email-based secure One-Time Password (OTP) login and registration.
+- **JWT Security**: Secure, stateless session management via JSON Web Tokens.
 
-## Tech Stack
+###  Subscriptions & Payments (Stripe)
+- **Tiered Subscriptions**: Users can browse and subscribe to premium plans.
+- **Premium Course Access**: Conditional access mechanisms for premium content based on the user's active subscription tier.
+- **Stripe Checkout**: Seamlessly integrated with Stripe Checkout for secure card transactions.
+- **Asynchronous Webhooks**: Real-time Stripe Webhook integration to automatically provision course access and activate subscriptions instantaneously post-payment.
 
-- **Backend:** Python 3.11+, Django 5.x, FastAPI, Uvicorn
-- **Auth:** JWT (python-jose), bcrypt (passlib), OAuth2 (httpx), email OTP
-- **Database:** SQLite (Development) / PostgreSQL (Production)
-- **Real-time:** WebSockets (FastAPI), Redis (Pub/Sub)
-- **Email:** SMTP Integration (OTP delivery + enrollment notifications)
+###  Course & Student Management
+- **Role-Based Pipelines**: Distinct flows and permissions for `Students` and `Instructors`.
+- **Student Dashboard**: A personalized dashboard fetching and displaying available and enrolled courses dynamically.
+- **Assignments & Analytics**: Instructors can manage assignments, track attendance, and view real-time monetization and enrollment analytics.
 
-## Setup and Installation
+###  Real-Time Communications
+- **Live Chat Rooms**: Built-in Websocket-based real-time chat architecture using Redis Pub/Sub, allowing students and instructors to communicate instantly.
+- **Event-Driven Notifications**: Automated in-app notifications and SMTP emails for enrollment and subscription events.
 
-### 1. Environment Setup
+---
+
+## 🛠️ Technology Stack
+
+| Component | Technology |
+|---|---|
+| **Backend Frameworks** | Django 5.x, FastAPI |
+| **ASGI Server** | Uvicorn |
+| **Authentication** | JWT, OAuth2, Passlib |
+| **Database** | SQLite (Dev) / PostgreSQL (Production) |
+| **Real-time & Caching**| Redis, WebSockets |
+| **Payment Gateway** | Stripe (with Webhooks) |
+| **Frontend UI** | HTML5, Bootstrap 5.3 |
+
+---
+
+##  Getting Started
+
+Follow these instructions to set up the project locally for development and testing.
+
+### 1. Prerequisites
+- **Python 3.11+** installed on your system.
+- **Redis Server** installed and running on your local machine (Default port: `6379`).
+- **Stripe CLI** (for local webhook testing).
+
+### 2. Clone and Setup Environment
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/learning-management-platform.git
+cd learning-management-platform
+
+# Create and activate a Virtual Environment
 python -m venv .venv
-source .venv/bin/activate   # Windows: .\.venv\Scripts\Activate
+
+# Windows
+.venv\Scripts\activate
+# macOS/Linux
+source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment Variables
+### 3. Environment Variables
 
-Copy `.env.example` to `.env` and fill in your values:
+Create a `.env` file in the root directory (you can refer to `.env.example` if available) and add the following keys.
 
-```bash
-cp .env.example .env
+```env
+# Django Settings
+DJANGO_SECRET_KEY=your_secure_django_secret_key
+DJANGO_DEBUG=true
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+
+# JWT Settings
+JWT_SECRET=your_secure_jwt_secret
+JWT_EXPIRE_MIN=60
+
+# OAuth2 - Social Login Credentials
+OAUTH_REDIRECT_BASE=http://localhost:8000
+GOOGLE_CLIENT_ID=your_google_id
+GOOGLE_CLIENT_SECRET=your_google_secret
+GITHUB_CLIENT_ID=your_github_id
+GITHUB_CLIENT_SECRET=your_github_secret
+FACEBOOK_CLIENT_ID=your_facebook_id
+FACEBOOK_CLIENT_SECRET=your_facebook_secret
+
+# Email Settings (For OTP & Notifications)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=true
+EMAIL_HOST_USER=your_email@gmail.com
+EMAIL_HOST_PASSWORD=your_app_specific_password
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# OTP
+OTP_EXPIRE_MINUTES=10
+
+# Stripe Payment Gateway
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-Key variables to set:
-| Variable | Description |
-|---|---|
-| `DJANGO_SECRET_KEY` | Django secret key |
-| `JWT_SECRET` | JWT signing secret |
-| `EMAIL_HOST_USER` | Gmail address for OTP delivery |
-| `EMAIL_HOST_PASSWORD` | Gmail App Password |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth2 credentials |
-| `FACEBOOK_CLIENT_ID` / `FACEBOOK_CLIENT_SECRET` | Facebook App credentials |
-| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth App credentials |
-| `OAUTH_REDIRECT_BASE` | FastAPI base URL (default: `http://localhost:8000`) |
+### 4. Database Setup
 
-### 3. Database Initialization
+Run the migrations to set up the SQLite (or Postgres) database.
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
-python manage.py createsuperuser
+python manage.py createsuperuser  # Create an admin account
 ```
 
-### 4. Running the Platform
+### 5. Running the Application
 
-Start Redis server (required for real-time chat):
+Because this platform leverages Django for the admin interface & frontend serving, and FastAPI for the async API & WebSocket connections, **both servers must be run concurrently.**
+
+**Terminal 1: Start FastAPI Backend**
 ```bash
-redis-server
+python -m uvicorn user_panel.main:app --host 0.0.0.0 --port 8001 --reload
 ```
 
-Start Django (Admin + Dashboard + Login page):
+**Terminal 2: Start Django Server**
 ```bash
-python manage.py runserver
+python manage.py runserver 8000
 ```
 
-Start FastAPI (User Panel + Auth API):
+**Terminal 3: Stripe Webhook Listener (Crucial for testing payments)**
 ```bash
-uvicorn user_panel.main:app --port 8001 --reload
+stripe login
+stripe listen --forward-to localhost:8001/webhook/
 ```
+*(Ensure the `whsec_...` secret generated by this command is updated in your `.env` file).*
 
-## OAuth2 Provider Setup
+---
 
-### Google
-1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-2. Create OAuth 2.0 Client ID (Web application)
-3. Add Authorized redirect URI: `http://localhost:8000/auth/google/callback/`
-4. Copy Client ID and Client Secret to `.env`
+## 📖 API & Navigation Reference
 
-### Facebook
-1. Go to [Facebook Developers](https://developers.facebook.com/apps/)
-2. Create an App → Add Facebook Login product
-3. Add Valid OAuth Redirect URI: `http://localhost:8000/auth/facebook/callback/`
-4. Copy App ID and App Secret to `.env`
+- **Unified Auth / Main Platform Landing**: `http://localhost:8000/login/`
+- **Django Admin Interface**: `http://localhost:8000/admin/`
+- **FastAPI Interactive Swagger Docs**: `http://localhost:8001/docs`
 
-### GitHub
-1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
-2. Create a new OAuth App
-3. Set Authorization callback URL: `http://localhost:8000/auth/github/callback/`
-4. Copy Client ID and Client Secret to `.env`
+---
 
-## API Documentation
 
-| URL | Description |
-|---|---|
-| `http://localhost:8000/login/` | Unified Login / Sign-Up Page |
-| `http://localhost:8001/docs` | Interactive Swagger UI (all API endpoints) |
-| `http://localhost:8000/admin/` | Django Admin Panel |
-| `http://localhost:8000/admin/dashboard/` | LMS Analytics Dashboard |
-| `http://localhost:8000/admin/chat/` | Real-time Chat |
-
-## Key API Endpoints
-
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/register/` | Register with email + password |
-| `POST` | `/login/` | Login with email + password |
-| `POST` | `/token/` | OAuth2 password flow (Swagger UI) |
-| `GET` | `/auth/google/` | Start Google OAuth2 flow |
-| `GET` | `/auth/facebook/` | Start Facebook OAuth2 flow |
-| `GET` | `/auth/github/` | Start GitHub OAuth2 flow |
-| `POST` | `/auth/otp/send/` | Send OTP to email |
-| `POST` | `/auth/otp/verify/` | Verify OTP and get JWT |
-
-## License
-
-This project is licensed under the MIT License.
+## 📄 License
+Distributed under the MIT License. See `LICENSE` for more information.

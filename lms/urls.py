@@ -3,7 +3,8 @@ from .views import (
     admin_dashboard, chat_messages_per_day, chat_top_users, chat_room_activity,
     chat_file_shares_per_day, chat_analytics_page, chat_home_page, chat_room_page,
     notifications_page, chat_stats_summary, course_analytics, login_page,
-    auth_login_proxy, auth_callback_proxy
+    auth_login_proxy, auth_callback_proxy,
+    student_dashboard, subscriptions_page, payment_success_page, payment_cancel_page
 )
 
 app_name = "lms"
@@ -23,4 +24,8 @@ urlpatterns = [
     path("admin/notifications/", notifications_page, name="notifications"),
     path("auth/<str:provider>/callback/", auth_callback_proxy, name="auth_callback_proxy"),
     path("auth/<str:provider>/", auth_login_proxy, name="auth_login_proxy"),
+    path("student/dashboard/", student_dashboard, name="student_dashboard"),
+    path("subscriptions/", subscriptions_page, name="subscriptions"),
+    path("payment/success/", payment_success_page, name="payment_success"),
+    path("payment/cancel/", payment_cancel_page, name="payment_cancel"),
 ]

@@ -62,6 +62,14 @@ class PaymentOut(BaseModel):
     payment_date: str
 
 
+class SubscriptionOut(BaseModel):
+    plan_id: int
+    plan_name: str
+    start_date: str
+    end_date: str
+    status: str
+
+
 class NotificationOut(BaseModel):
     id: int
     message: str

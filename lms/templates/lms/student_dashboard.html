@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Student Dashboard • Learning Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Rounded"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --m3-primary: #5b8dee;
+            --pastel-blue: #A7C7E7;
+            --pastel-pink: #F7C8E0;
+            --pastel-green: #CDEAC0;
+            --pastel-peach: #FBE7C6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .m3-card {
+            border: none;
+            border-radius: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+        }
+
+        .m3-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .card-img-top-placeholder {
+            height: 140px;
+            background: linear-gradient(135deg, var(--pastel-blue), var(--pastel-pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .card-img-top-placeholder.premium {
+            background: linear-gradient(135deg, #f5a623, #f7c948);
+        }
+
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .btn-pastel {
+            background-color: var(--pastel-blue);
+            color: #1a1c2e;
+            border: none;
+            font-weight: 500;
+            border-radius: 50px;
+        }
+
+        .btn-pastel:hover {
+            background-color: #8fbcee;
+        }
+
+        .premium-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #d97706;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2 text-primary" href="/student/dashboard/">
+                <span class="material-symbols-rounded">school</span> LMS Dashboard
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navCollapse">
+                <span class="material-symbols-rounded">menu</span>
+            </button>
+            <div class="collapse navbar-collapse" id="navCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active fw-medium" href="/student/dashboard/">Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-medium" href="/subscriptions/">Subscriptions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-medium" href="/admin/chat/">Chat</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="dropdown">
+                        <a class="btn btn-light rounded-circle p-2 position-relative" href="/admin/notifications/"
+                            id="notifBtn">
+                            <span class="material-symbols-rounded">notifications</span>
+                            <span id="notif-badge"
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light p-1 d-none"></span>
+                        </a>
+                    </div>
+                    <div class="avatar-circle bg-primary text-white" id="avatarText">U</div>
+                    <a href="#" onclick="logout()" class="text-muted ms-2" title="Logout"><span
+                            class="material-symbols-rounded">logout</span></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+        <!-- Welcome Header -->
+        <div class="row align-items-center mb-5">
+            <div class="col-md-8">
+                <h2 class="fw-bold mb-1" id="greeting">Welcome Back!</h2>
+                <p class="text-muted mb-0">Continue your learning journey today.</p>
+            </div>
+            <div class="col-md-4 mt-3 mt-md-0 text-md-end">
+                <span id="subStatusBadge" class="badge rounded-pill bg-secondary px-3 py-2 fw-medium fs-6 shadow-sm">
+                    <span class="material-symbols-rounded fs-6 align-middle me-1">verified</span> Free Tier
+                </span>
+                <a href="/subscriptions/" class="btn btn-sm btn-outline-primary rounded-pill ms-2"
+                    id="upgradeBtn">Upgrade</a>
+            </div>
+        </div>
+
+        <!-- My Enrolled Courses -->
+        <div id="enrolledSection" class="mb-5 d-none">
+            <h4 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <span class="material-symbols-rounded text-primary">menu_book</span> My Courses
+            </h4>
+            <div class="row g-4" id="enrolledCoursesList"></div>
+        </div>
+
+        <!-- Available Courses -->
+        <div>
+            <h4 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <span class="material-symbols-rounded text-success">explore</span> Available Courses
+            </h4>
+            <div class="row g-4" id="availableCoursesList">
+                <div class="col-12 py-5 text-center">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Loading courses...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const api = 'http://localhost:8001';
+        const greeting = document.getElementById('greeting');
+        const avatarText = document.getElementById('avatarText');
+        const enrolledCoursesList = document.getElementById('enrolledCoursesList');
+        const enrolledSection = document.getElementById('enrolledSection');
+        const availableCoursesList = document.getElementById('availableCoursesList');
+        const notifBadge = document.getElementById('notif-badge');
+        const subStatusBadge = document.getElementById('subStatusBadge');
+        const upgradeBtn = document.getElementById('upgradeBtn');
+
+        let enrolledCourseIds = new Set();
+        let hasActiveSub = false;
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login/';
+        }
+
+        async function authFetch(path, opts = {}) {
+            const t = localStorage.getItem('token');
+            if (!t) {
+                window.location.href = '/login/';
+                return Promise.reject("No token");
+            }
+            opts.headers = Object.assign({}, opts.headers || {}, { 'Authorization': 'Bearer ' + t });
+            const r = await fetch(api + path, opts);
+            if (r.status === 401) {
+                localStorage.clear();
+                window.location.href = '/login/';
+            }
+            return r;
+        }
+
+        async function checkSubscription() {
+            try {
+                const subRes = await authFetch('/subscriptions/me/');
+                if (subRes.ok) {
+                    const subData = await subRes.json();
+                    if (subData && subData.plan_id) {
+                        hasActiveSub = true;
+                        subStatusBadge.className = "badge rounded-pill bg-warning text-dark px-3 py-2 fw-medium fs-6 shadow-sm";
+                        subStatusBadge.innerHTML = `<span class="material-symbols-rounded fs-6 align-middle me-1">workspace_premium</span> ${subData.plan_name}`;
+                        upgradeBtn.classList.add('d-none');
+                    }
+                }
+            } catch (e) { }
+        }
+
+        async function enrollCourse(courseId, btn) {
+            btn.disabled = true;
+            btn.innerHTML = 'Enrolling...';
+            try {
+                const r = await authFetch('/enroll/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ course_id: courseId })
+                });
+                if (r.ok) {
+                    alert('Successfully enrolled!');
+                    loadCourses();
+                } else {
+                    const j = await r.json();
+                    alert(j.detail || 'Enrollment failed');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Enroll Free';
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Enroll Free';
+            }
+        }
+
+        async function buyCourse(courseId, btn) {
+            btn.disabled = true;
+            btn.innerHTML = 'Redirecting...';
+            try {
+                const r = await authFetch('/create-checkout-session/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'course', item_id: courseId })
+                });
+                const j = await r.json();
+                if (r.ok && j.url) {
+                    window.location.href = j.url;
+                } else {
+                    alert(j.detail || 'Failed to initiate checkout');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Buy Course';
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Buy Course';
+            }
+        }
+
+        function buildCourseCard(c, type) {
+            // type: 'enrolled', 'available-free', 'available-premium'
+            const isPremium = c.is_premium || type === 'available-premium';
+            let badgeHtml = '';
+            if (isPremium && type !== 'enrolled') {
+                badgeHtml = `<div class="premium-badge"><span class="material-symbols-rounded fs-6">star</span> Premium</div>`;
+            }
+
+            let actionBtn = '';
+            if (type === 'enrolled') {
+                actionBtn = `<a href="#" class="btn btn-outline-primary btn-sm rounded-pill w-100">Go to Course</a>`;
+            } else if (type === 'available-free') {
+                actionBtn = `<button onclick="enrollCourse(${c.id}, this)" class="btn btn-pastel btn-sm px-4 w-100">Enroll Free</button>`;
+            } else if (type === 'available-premium') {
+                actionBtn = `<button onclick="buyCourse(${c.id}, this)" class="btn btn-warning btn-sm rounded-pill font-weight-bold w-100">Buy Course (₹ ${c.price || 'N/A'})</button>`;
+            }
+
+            return `
+          <div class="col-md-6 col-lg-4">
+            <div class="card m3-card h-100 shadow-sm position-relative">
+              ${badgeHtml}
+              <div class="card-img-top-placeholder ${isPremium ? 'premium' : ''}">
+                <span class="material-symbols-rounded" style="font-size:48px">play_lesson</span>
+              </div>
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title fw-bold text-truncate">${c.title}</h5>
+                <p class="card-text text-muted small flex-grow-1">${c.description.substring(0, 80)}...</p>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <div class="avatar-circle bg-light text-dark" style="width:24px;height:24px;font-size:12px;">
+                    ${c.instructor_name[0].toUpperCase()}
+                  </div>
+                  <small class="text-muted fw-medium">${c.instructor_name}</small>
+                </div>
+                ${actionBtn}
+              </div>
+            </div>
+          </div>
+        `;
+        }
+
+        async function loadCourses() {
+            try {
+                // 1. Fetch My Courses
+                const rMy = await authFetch('/my-courses/');
+                let myCourses = [];
+                if (rMy.ok) {
+                    myCourses = await rMy.json();
+                    enrolledCourseIds = new Set(myCourses.map(c => c.id));
+                    if (myCourses.length > 0) {
+                        enrolledSection.classList.remove('d-none');
+                        enrolledCoursesList.innerHTML = myCourses.map(c => buildCourseCard(c, 'enrolled')).join('');
+                    } else {
+                        enrolledSection.classList.add('d-none');
+                    }
+                }
+
+                // 2. Fetch All Courses
+                const rAll = await authFetch('/courses/');
+                if (rAll.ok) {
+                    const allCourses = await rAll.json();
+                    // Filter out enrolled ones
+                    const available = allCourses.filter(c => !enrolledCourseIds.has(c.id));
+                    if (available.length > 0) {
+                        availableCoursesList.innerHTML = available.map(c => {
+                            // Backend should return is_premium or price attributes, check swagger or schema
+                            // Assuming it returns is_premium boolean if available
+                            if (c.is_premium) return buildCourseCard(c, 'available-premium');
+                            // If we are showing premium because they have no sub, standard logic applies.
+                            // The API /courses/ only returns premium if they HAVE a sub, wait.
+                            // So if they show up here they are free, unless we modify the backend endpoint to return ALL.
+                            // If backend returns all and we decide based on is_premium:
+                            return buildCourseCard(c, c.is_premium ? 'available-premium' : 'available-free');
+                        }).join('');
+                    } else {
+                        availableCoursesList.innerHTML = `<div class="col-12 text-center text-muted py-5">No more courses available. Check back later!</div>`;
+                    }
+                } else {
+                    availableCoursesList.innerHTML = `<div class="col-12 text-danger">Failed to load courses.</div>`;
+                }
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function setup() {
+            const email = localStorage.getItem('email') || 'User';
+            greeting.textContent = 'Welcome Back, ' + email.split('@')[0] + '!';
+            avatarText.textContent = email[0].toUpperCase();
+
+            await checkSubscription();
+            await loadCourses();
+        }
+
+        setup();
+    </script>
+</body>
+
+</html>
